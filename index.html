@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAFIA: The Conspiracy</title>
+    <title>MAFIA: Aracord studio</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2146,7 +2146,7 @@
     <!-- ------------------ 1. MAIN MENU SCREEN ------------------ -->
     <div class="glass-panel" id="menu-screen">
         <h1 class="title-glow">MAFIA</h1>
-        <div class="subtitle">The Conspiracy</div>
+        <div class="subtitle">Aracord studio</div>
 
         <div class="menu-grid">
             <div class="input-group">
@@ -2186,7 +2186,7 @@
                 </button>
             </div>
 
-            <div class="menu-footer">Built for tactical deciders. Turn on sound.</div>
+            <div class="menu-footer">Developed By Eng.Kinan rahal, Eng.Mehmet battal</div>
         </div>
     </div>
 
@@ -2488,13 +2488,18 @@
             Multiplayer Lobby</h2>
 
         <!-- Network Connection Error Banner -->
-        <div id="lobby-network-error-banner" class="hidden" style="background: rgba(207, 42, 42, 0.15); border: 1px solid var(--accent-crimson); border-radius: 8px; padding: 15px; margin-bottom: 20px; text-align: left; animation: fadeIn 0.4s ease;">
+        <div id="lobby-network-error-banner" class="hidden"
+            style="background: rgba(207, 42, 42, 0.15); border: 1px solid var(--accent-crimson); border-radius: 8px; padding: 15px; margin-bottom: 20px; text-align: left; animation: fadeIn 0.4s ease;">
             <div style="display: flex; gap: 10px; align-items: start;">
                 <span style="font-size: 1.5rem; line-height: 1;">⚠️</span>
                 <div>
-                    <h4 style="color: #ff4d4d; font-weight: bold; margin-bottom: 5px; font-size: 0.95rem;">Matchmaking Broker Connection Failed</h4>
+                    <h4 style="color: #ff4d4d; font-weight: bold; margin-bottom: 5px; font-size: 0.95rem;">Matchmaking
+                        Broker Connection Failed</h4>
                     <p style="font-size: 0.82rem; line-height: 1.4; color: var(--text-main); margin-bottom: 8px;">
-                        The game cannot establish a multiplayer signaling connection. This is usually because an adblocker (like <strong>uBlock Origin</strong>) or browser security shield (like <strong>Brave Shields</strong>) is blocking the public PeerJS matchmaking server (<code style="background: rgba(0,0,0,0.3); padding: 2px 4px; border-radius: 4px;">0.peerjs.com</code>).
+                        The game cannot establish a multiplayer signaling connection. This is usually because an
+                        adblocker (like <strong>uBlock Origin</strong>) or browser security shield (like <strong>Brave
+                            Shields</strong>) is blocking the public PeerJS matchmaking server (<code
+                            style="background: rgba(0,0,0,0.3); padding: 2px 4px; border-radius: 4px;">0.peerjs.com</code>).
                     </p>
                     <div style="font-size: 0.8rem; color: var(--accent-gold); font-weight: 500;">
                         To play with friends:
@@ -2524,7 +2529,9 @@
                 <ul class="player-lobby-list" id="lobby-players-ul">
                     <!-- Rows filled dynamically -->
                 </ul>
-                <button class="btn host-only-control" id="btn-lobby-add-bot" onclick="addBotToLobby()" style="margin-top: 15px; width: 100%; padding: 8px 16px; font-size: 0.85rem; display: none;">Add Bot</button>
+                <button class="btn host-only-control" id="btn-lobby-add-bot" onclick="addBotToLobby()"
+                    style="margin-top: 15px; width: 100%; padding: 8px 16px; font-size: 0.85rem; display: none;">Add
+                    Bot</button>
             </div>
 
             <!-- Host Settings Panel (Visible to Host, Read-only for Client) -->
@@ -3047,6 +3054,7 @@
             }
 
             init() {
+                this.initAudio();
                 if (this.ctx) return;
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
                 if (!AudioCtx) return;
@@ -3059,8 +3067,6 @@
                 this.sfxGain = this.ctx.createGain();
                 this.sfxGain.gain.setValueAtTime(this.sfxVolume, this.ctx.currentTime);
                 this.sfxGain.connect(this.ctx.destination);
-
-                this.initAudio();
             }
 
             initAudio() {
@@ -3869,7 +3875,7 @@
             peer.on('error', (err) => {
                 console.error("PeerJS error:", err);
                 document.getElementById('lobby-chat-box').innerHTML += `<div style="color: var(--accent-crimson);">Network Error: ${err.type}</div>`;
-                
+
                 if (err.type === 'network') {
                     const errBanner = document.getElementById('lobby-network-error-banner');
                     if (errBanner) errBanner.classList.remove('hidden');
@@ -3916,6 +3922,9 @@
             currentPhaseToken++;
             gameActive = false;
             clearInterval(gameTimer);
+
+            document.getElementById('bg-overlay').style.backgroundImage = "url('background.png')";
+            document.getElementById('bg-overlay').style.filter = "brightness(0.25) contrast(1.1)";
             clearBotVotingTimers();
             if (botChatTimer) clearTimeout(botChatTimer);
             audioSynth.stopBgm();
@@ -4362,7 +4371,7 @@
                 if (peerConns[cId].open) {
                     let clientPacket = packet;
                     clientPacket = JSON.parse(JSON.stringify(packet));
-                    if (packet.data && packet.data.players) {
+                    if (packet.data && packet.data.players && packet.type !== 'GAME_OVER') {
                         clientPacket.data.players = getMaskedPlayersForClient(cId);
                     }
                     const recipient = players.find(p => p.id === cId);
@@ -4409,7 +4418,7 @@
                 // Solo mode does direct syncs
             } else if (isHost) {
                 let hostPacket = JSON.parse(JSON.stringify(packet));
-                if (packet.data && packet.data.players) {
+                if (packet.data && packet.data.players && packet.type !== 'GAME_OVER') {
                     hostPacket.data.players = getMaskedPlayersForClient(myId);
                 }
                 const hostPlayer = players.find(p => p.id === myId);
@@ -4909,7 +4918,8 @@
             tallyInProgress = false;
             document.body.className = "phase-night";
 
-            // Night lighting filter
+            // Night lighting filter and background
+            document.getElementById('bg-overlay').style.backgroundImage = "url('night.png')";
             document.getElementById('bg-overlay').style.filter = "brightness(0.12) contrast(1.2) hue-rotate(50deg)";
 
             const isMafiaSide = myRole && ROLES_INFO[myRole] && ROLES_INFO[myRole].team === 'mafia';
@@ -5714,6 +5724,7 @@
             document.getElementById('game-chat-container').innerHTML = "";
             switchGameTab('game', true); // Auto switch to Narrative Log tab silently at morning
             document.body.className = "phase-day";
+            document.getElementById('bg-overlay').style.backgroundImage = "url('chating.png')";
             document.getElementById('bg-overlay').style.filter = "brightness(0.25) contrast(1.1)";
 
             addNarrativeLog(`--- DAY TIME (DISCUSS TIME) ${roundsCount} ---`, 'system');
@@ -5887,6 +5898,9 @@
             tallyInProgress = false;
             clearBotVotingTimers();
 
+            document.getElementById('bg-overlay').style.backgroundImage = "url('background.png')";
+            document.getElementById('bg-overlay').style.filter = "brightness(0.25) contrast(1.1)";
+
             addNarrativeLog("Discussion concludes. The Town Council is called to order. Cast your vote!", 'system');
 
             renderGamePlayerCards();
@@ -5961,6 +5975,9 @@
             defendingPlayerId = defendantId;
             defendVotes = initialDefendVotes || {};
             tallyInProgress = false;
+
+            document.getElementById('bg-overlay').style.backgroundImage = "url('background.png')";
+            document.getElementById('bg-overlay').style.filter = "brightness(0.25) contrast(1.1)";
 
             const defendant = players.find(p => p.id === defendantId);
             const defendantName = defendant ? defendant.name : "A Suspect";
@@ -6048,6 +6065,9 @@
             defendingPlayerId = defendantId;
             votes = initialVotes || {};
             currentTargetId = null;
+
+            document.getElementById('bg-overlay').style.backgroundImage = "url('background.png')";
+            document.getElementById('bg-overlay').style.filter = "brightness(0.25) contrast(1.1)";
 
             const defendant = players.find(p => p.id === defendantId);
             const defendantName = defendant ? defendant.name : "A Suspect";
@@ -6588,6 +6608,9 @@
             gameActive = false;
             gameState = 'game_over';
             clearInterval(gameTimer);
+
+            document.getElementById('bg-overlay').style.backgroundImage = "url('background.png')";
+            document.getElementById('bg-overlay').style.filter = "brightness(0.25) contrast(1.1)";
             clearBotVotingTimers();
             if (botChatTimer) clearTimeout(botChatTimer);
             audioSynth.stopBgm();
@@ -6668,10 +6691,10 @@
             card.style.cursor = 'pointer';
             card.onclick = () => showCardPopupForPlayer(p.id);
 
-            const pRoleInfo = ROLES_INFO[p.role];
+            const pRoleInfo = p.role ? ROLES_INFO[p.role] : null;
             const pTeam = pRoleInfo ? pRoleInfo.team : null;
             const roleBadgeColor = pTeam === 'mafia' ? 'var(--accent-crimson)' : (pTeam === 'jester' ? '#cf2acf' : 'var(--accent-blue)');
-            const displayRoleName = pRoleInfo ? pRoleInfo.name.toUpperCase() : p.role.toUpperCase();
+            const displayRoleName = pRoleInfo ? pRoleInfo.name.toUpperCase() : (p.role ? p.role.toUpperCase() : 'UNKNOWN');
 
             // Status badge (ALIVE/DEAD)
             let badgeHTML = "";
@@ -6685,7 +6708,7 @@
                 ${badgeHTML}
                 <span class="card-status-badge" style="top: 5px; right: 5px; left: auto; color:${roleBadgeColor}; font-weight:bold; font-size:0.6rem; z-index: 3;">${displayRoleName}</span>
                 <div class="card-art-container">
-                    <img src="${p.role}.png" class="card-art-image" onerror="handleCardArtError(this, '${p.role}', '${p.id}-go')">
+                    <img src="${p.role || 'cardback'}.png" class="card-art-image" onerror="handleCardArtError(this, '${p.role || 'cardback'}', '${p.id}-go')">
                     <div class="card-art-fallback hidden" id="fallback-svg-${p.id}-go"></div>
                 </div>
                 <div class="player-card-name">${escapeHTML(p.name)} ${p.id === myId ? '(You)' : ''}</div>
@@ -6712,6 +6735,9 @@
         function returnToLobbyOrMenu() {
             audioSynth.playClick();
             clearBotVotingTimers();
+
+            document.getElementById('bg-overlay').style.backgroundImage = "url('background.png')";
+            document.getElementById('bg-overlay').style.filter = "brightness(0.25) contrast(1.1)";
             if (isMultiplayer) {
                 // Return to Multiplayer lobby setup
                 transitionScreen('game-over-screen', 'multiplayer-lobby-screen');
@@ -6929,7 +6955,8 @@
             setTimeout(() => {
                 let displayMsg = parsed.displayLog || log;
                 if (parsed.actor === 'doctor') {
-                    displayMsg = "Doctor protected a player.";
+                    const isSuccess = (parsed.actionType === 'protect_success' || parsed.actionType === 'protect_mafia_fail' || parsed.actionType === 'protect_vig_fail' || parsed.actionType === 'protect_double_fail' || parsed.actionType === 'protect_saved');
+                    displayMsg = isSuccess ? "a doctor protect a player sucsessfuly" : "Doctor protected a player.";
                 }
                 descEl.innerText = displayMsg;
                 descEl.style.opacity = 1;
@@ -7659,6 +7686,22 @@
 
             // Start BGM on first user interaction (bypasses browser autoplay policy)
             document.addEventListener('click', () => {
+                audioSynth.init(); // Initialize gains & audio elements
+
+                // Unlock all HTML5 Audio elements in this user gesture
+                const unlock = (audio) => {
+                    if (audio) {
+                        audio.play().then(() => {
+                            audio.pause();
+                        }).catch(e => console.log("Audio unlock:", e));
+                    }
+                };
+                unlock(audioSynth.lobbyAudio);
+                unlock(audioSynth.nightshiftAudio);
+                unlock(audioSynth.mafiaAudio);
+                unlock(audioSynth.roosterAudio);
+                unlock(audioSynth.endgameAudio);
+
                 if (audioSynth.bgmType === null) {
                     audioSynth.playLobbyMusic();
                 }
