@@ -4156,22 +4156,16 @@
         async function acquireLocalStream() {
             if (localAudioStream) return;
             try {
+                // NEW: Safely exit if the browser blocks mic access (e.g., non-HTTPS)
                 if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    throw new Error("API not supported in this browser context (likely insecure context or file:// protocol)");
+                    console.warn("Microphone API blocked (requires HTTPS). Voice chat disabled.");
+                    return; 
                 }
                 localAudioStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
                 console.log("Local microphone stream acquired.");
                 isMuted = false;
-                const chatBox = document.getElementById('lobby-chat-box');
-                if (chatBox) {
-                    chatBox.innerHTML += `<div style="color: var(--text-muted); font-style: italic;">Microphone stream acquired.</div>`;
-                }
             } catch (err) {
                 console.error("Microphone access denied or failed:", err);
-                const chatBox = document.getElementById('lobby-chat-box');
-                if (chatBox) {
-                    chatBox.innerHTML += `<div style="color: var(--accent-gold); font-style: italic;">⚠️ Microphone failed (${err.message || err}). Connecting without voice chat...</div>`;
-                }
             }
         }
 
@@ -4205,29 +4199,30 @@
             console.log("Initializing PeerJS with ID:", myId, "Retry Count:", peerRetryCount);
 
             // Construct peer configuration loading options from localStorage or falling back to default cloud settings
-            const savedHost = (localStorage.getItem('peerjs-host') || '0.peerjs.com').trim();
-            const savedPort = parseInt(localStorage.getItem('peerjs-port')) || 443;
-            const savedSecure = localStorage.getItem('peerjs-secure') !== null ? localStorage.getItem('peerjs-secure') === 'true' : true;
-            const savedPath = (localStorage.getItem('peerjs-path') || '/').trim();
-            const savedKey = (localStorage.getItem('peerjs-key') || 'peerjs').trim();
+            const savedHost = localStorage.getItem('peerjs-host');
+            const savedPort = localStorage.getItem('peerjs-port');
+            const savedSecure = localStorage.getItem('peerjs-secure');
+            const savedPath = localStorage.getItem('peerjs-path');
+            const savedKey = localStorage.getItem('peerjs-key');
 
+            // UPDATED: Rely on default cloud routing and reliable STUN servers
             const peerOptions = {
-                host: savedHost,
-                port: savedPort,
-                secure: savedSecure,
-                path: savedPath,
-                key: savedKey,
                 debug: 1,
+                secure: savedSecure !== null ? savedSecure === 'true' : true,
                 config: {
                     iceServers: [
                         { urls: 'stun:stun.l.google.com:19302' },
                         { urls: 'stun:stun1.l.google.com:19302' },
-                        { urls: 'stun:stun2.l.google.com:19302' },
-                        { urls: 'stun:stun3.l.google.com:19302' },
-                        { urls: 'stun:stun4.l.google.com:19302' }
+                        { urls: 'stun:global.stun.twilio.com:3478' }
                     ]
                 }
             };
+
+            // Only override default cloud routing if custom settings are configured
+            if (savedHost) peerOptions.host = savedHost.trim();
+            if (savedPort) peerOptions.port = parseInt(savedPort) || 443;
+            if (savedPath) peerOptions.path = savedPath.trim();
+            if (savedKey) peerOptions.key = savedKey.trim();
 
             peer = new Peer(myId, peerOptions);
 
