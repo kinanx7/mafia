@@ -1016,13 +1016,13 @@
             display: grid;
             grid-template-columns: 1fr;
             gap: 20px;
-            height: 310px;
+            height: 410px;
         }
 
         @media (max-width: 768px) {
             .game-bottom-area {
                 grid-template-columns: 1fr;
-                height: 270px;
+                height: 350px;
             }
         }
 
@@ -4736,6 +4736,7 @@
             // Trigger establishing voice connections with peers in the lobby
             if (isMultiplayer) {
                 connectVoiceToAllPeers();
+                updateVoiceStatus();
             }
         }
 
