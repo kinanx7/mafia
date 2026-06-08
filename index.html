@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAFIA: Aracord studio</title>
+    <title>MAFIA: Aracord studios</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2165,7 +2165,7 @@
     <!-- ------------------ 1. MAIN MENU SCREEN ------------------ -->
     <div class="glass-panel" id="menu-screen">
         <h1 class="title-glow">MAFIA</h1>
-        <div class="subtitle">Aracord studio</div>
+        <div class="subtitle">Aracord studios</div>
 
         <div class="menu-grid">
             <div class="input-group">
@@ -2342,6 +2342,18 @@
                                 <span class="count-display" id="solo-timer-defend-display"
                                     style="width: 35px;">15</span>
                                 <button class="count-btn" onclick="adjustTimer('solo-timer-defend', 5)">+</button>
+                            </div>
+                        </div>
+
+                        <div
+                            style="display: flex; justify-content: space-between; margin-top: 12px; align-items: center; font-size: 0.95rem;">
+                            <span>Reveal Roles on Death</span>
+                            <div class="role-controls">
+                                <label class="role-switch">
+                                    <input type="checkbox" id="solo-reveal-roles-toggle" checked
+                                        onchange="deckConfig.revealRolesOnDeath = this.checked">
+                                    <span class="switch-slider"></span>
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -2603,6 +2615,19 @@
                             <span class="count-display" id="multi-timer-defend-display" style="width: 35px;">15</span>
                             <button class="count-btn host-only-control"
                                 onclick="adjustMultiTimer('defend', 5)">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Reveal Roles toggle -->
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; margin-bottom: 15px;">
+                        <span>Reveal Roles on Death</span>
+                        <div class="role-controls">
+                            <label class="role-switch">
+                                <input type="checkbox" id="multi-reveal-roles-toggle" class="host-only-control" checked
+                                    onchange="onMultiSettingChanged()">
+                                <span class="switch-slider"></span>
+                            </label>
                         </div>
                     </div>
 
@@ -2951,9 +2976,11 @@
                 </div>
             </div>
 
-            <div class="setting-row hidden" id="mic-selector-row" style="flex-direction: column; align-items: stretch; gap: 8px;">
+            <div class="setting-row hidden" id="mic-selector-row"
+                style="flex-direction: column; align-items: stretch; gap: 8px;">
                 <label style="align-self: flex-start;">Microphone Input Device</label>
-                <select id="mic-device-select" class="text-input" onchange="changeMicrophone(this.value)" style="width: 100%; background: rgba(0,0,0,0.4); color: #fff; font-size: 0.85rem; padding: 6px; border: 1px solid var(--glass-border); border-radius: 6px; cursor: pointer;">
+                <select id="mic-device-select" class="text-input" onchange="changeMicrophone(this.value)"
+                    style="width: 100%; background: rgba(0,0,0,0.4); color: #fff; font-size: 0.85rem; padding: 6px; border: 1px solid var(--glass-border); border-radius: 6px; cursor: pointer;">
                     <option value="">Default Microphone</option>
                 </select>
             </div>
@@ -3456,7 +3483,7 @@
             const modal = document.getElementById('settings-modal');
             if (show) {
                 modal.classList.remove('hidden');
-                
+
                 // Show microphone settings in multiplayer only
                 const micRow = document.getElementById('mic-selector-row');
                 if (micRow) {
@@ -3591,7 +3618,8 @@
             bard: true,
             vigilante: true,
             scout: true,
-            jester: true
+            jester: true,
+            revealRolesOnDeath: true
         };
         let timerConfig = {
             discuss: 30,
@@ -3659,6 +3687,7 @@
             document.getElementById('multi-role-vigilante-toggle').disabled = false;
             document.getElementById('multi-role-scout-toggle').disabled = false;
             document.getElementById('multi-role-jester-toggle').disabled = false;
+            document.getElementById('multi-reveal-roles-toggle').disabled = false;
             document.getElementById('settings-lock-title').innerText = "Room Settings";
 
             document.getElementById('btn-start-multiplayer').innerText = "Start Game";
@@ -3699,6 +3728,7 @@
             document.getElementById('multi-role-vigilante-toggle').disabled = true;
             document.getElementById('multi-role-scout-toggle').disabled = true;
             document.getElementById('multi-role-jester-toggle').disabled = true;
+            document.getElementById('multi-reveal-roles-toggle').disabled = true;
             document.getElementById('settings-lock-title').innerText = "Room Settings (Locked)";
 
             document.getElementById('btn-start-multiplayer').innerText = "Waiting for Host...";
@@ -7813,7 +7843,7 @@
                 const devices = await navigator.mediaDevices.enumerateDevices();
                 const audioInputs = devices.filter(d => d.kind === 'audioinput');
                 selectEl.innerHTML = "";
-                
+
                 if (audioInputs.length === 0) {
                     const opt = document.createElement('option');
                     opt.value = "";
