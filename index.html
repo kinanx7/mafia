@@ -2524,6 +2524,7 @@
                 <ul class="player-lobby-list" id="lobby-players-ul">
                     <!-- Rows filled dynamically -->
                 </ul>
+                <button class="btn host-only-control" id="btn-lobby-add-bot" onclick="addBotToLobby()" style="margin-top: 15px; width: 100%; padding: 8px 16px; font-size: 0.85rem; display: none;">Add Bot</button>
             </div>
 
             <!-- Host Settings Panel (Visible to Host, Read-only for Client) -->
@@ -4614,8 +4615,53 @@
                 listEl.appendChild(li);
             });
 
+            // Show/Hide Add Bot button based on isHost
+            const addBotBtn = document.getElementById('btn-lobby-add-bot');
+            if (addBotBtn) {
+                addBotBtn.style.display = isHost ? 'inline-flex' : 'none';
+            }
+
             // Re-eval controls
             recalculateMultiDeck();
+        }
+
+        function addBotToLobby() {
+            if (!isHost) return;
+            audioSynth.playClick();
+
+            // Find a unique name from BOT_NAMES
+            const existingNames = players.map(p => p.name);
+            const availableNames = BOT_NAMES.filter(name => !existingNames.includes(name));
+            let botName = "Bot";
+            if (availableNames.length > 0) {
+                botName = availableNames[Math.floor(Math.random() * availableNames.length)];
+            } else {
+                botName = "Bot " + (players.filter(p => p.isBot).length + 1);
+            }
+
+            const botId = "bot-lobby-" + Date.now();
+
+            const botPlayer = {
+                id: botId,
+                name: botName,
+                isBot: true,
+                isHost: false,
+                alive: true,
+                role: null
+            };
+
+            players.push(botPlayer);
+            broadcastRoomState();
+            updateLobbyUI();
+
+            // Notify in lobby chat
+            broadcastSystemChat(`${botName} (BOT) has joined the lobby.`);
+
+            const chatBox = document.getElementById('lobby-chat-box');
+            if (chatBox) {
+                chatBox.innerHTML += `<div><span class="chat-sender">SYSTEM:</span> ${botName} (BOT) has joined the lobby.</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
         }
 
         function sendLobbyChatMsg() {
@@ -5234,8 +5280,8 @@
         function processNightCalculations() {
             if (!isHost) return;
 
-            // Trigger bot logic if Solo Mode
-            if (!isMultiplayer) {
+            // Trigger bot logic if Host
+            if (isHost) {
                 simulateBotNightActions();
             }
 
@@ -5786,8 +5832,8 @@
                         }
                     });
 
-                    // Start bot conversations in Solo
-                    if (isHost && !isMultiplayer) {
+                    // Start bot conversations
+                    if (isHost) {
                         startBotChatTimer();
                     }
                 });
@@ -5852,8 +5898,8 @@
                     }
                 });
 
-                // Start bot voting simulation in Solo Mode
-                if (isHost && !isMultiplayer) {
+                // Start bot voting simulation
+                if (isHost) {
                     startBotVotingSimulation();
                 }
             });
@@ -6015,8 +6061,8 @@
                 `;
             }
 
-            // Run bots voting logic if host in Solo
-            if (isHost && !isMultiplayer) {
+            // Run bots voting logic if host
+            if (isHost) {
                 startBotVotingSimulation();
             }
 
@@ -6419,6 +6465,9 @@
                 const msg = generateBotDialogue(talkingBot);
 
                 addGameChatLog(talkingBot.name, msg, 'all', false);
+                if (isMultiplayer) {
+                    broadcastGameChatPacket(talkingBot.id, msg, 'all');
+                }
 
                 // Loop with random spacing
                 botChatTimer = setTimeout(runBotChat, 4000 + Math.random() * 6000);
