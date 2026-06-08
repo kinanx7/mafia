@@ -2472,6 +2472,26 @@
         <h2 class="heading-serif" id="multi-lobby-title" style="margin-bottom: 20px; color: var(--accent-gold);">
             Multiplayer Lobby</h2>
 
+        <!-- Network Connection Error Banner -->
+        <div id="lobby-network-error-banner" class="hidden" style="background: rgba(207, 42, 42, 0.15); border: 1px solid var(--accent-crimson); border-radius: 8px; padding: 15px; margin-bottom: 20px; text-align: left; animation: fadeIn 0.4s ease;">
+            <div style="display: flex; gap: 10px; align-items: start;">
+                <span style="font-size: 1.5rem; line-height: 1;">⚠️</span>
+                <div>
+                    <h4 style="color: #ff4d4d; font-weight: bold; margin-bottom: 5px; font-size: 0.95rem;">Matchmaking Broker Connection Failed</h4>
+                    <p style="font-size: 0.82rem; line-height: 1.4; color: var(--text-main); margin-bottom: 8px;">
+                        The game cannot establish a multiplayer signaling connection. This is usually because an adblocker (like <strong>uBlock Origin</strong>) or browser security shield (like <strong>Brave Shields</strong>) is blocking the public PeerJS matchmaking server (<code style="background: rgba(0,0,0,0.3); padding: 2px 4px; border-radius: 4px;">0.peerjs.com</code>).
+                    </p>
+                    <div style="font-size: 0.8rem; color: var(--accent-gold); font-weight: 500;">
+                        To play with friends:
+                        <ul style="margin-left: 15px; margin-top: 4px; list-style-type: disc;">
+                            <li>Disable your adblocker/Shield for this site.</li>
+                            <li>Reload the page and try hosting/joining again.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="lobby-layout">
             <!-- Room Info & Player List -->
             <div class="lobby-section">
@@ -3741,13 +3761,27 @@
                 host: '0.peerjs.com',
                 port: 443,
                 secure: true,
+                path: '/',
                 key: 'peerjs',
-                debug: 1
+                debug: 1,
+                config: {
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:stun2.l.google.com:19302' },
+                        { urls: 'stun:stun3.l.google.com:19302' },
+                        { urls: 'stun:stun4.l.google.com:19302' }
+                    ]
+                }
             });
 
             peer.on('open', (id) => {
                 console.log('PeerJS connection opened with ID:', id);
                 document.getElementById('lobby-chat-box').innerHTML += `<div style="color: var(--accent-green);">Successfully registered on broker.</div>`;
+
+                // Hide adblocker error banner on successful connection
+                const errBanner = document.getElementById('lobby-network-error-banner');
+                if (errBanner) errBanner.classList.add('hidden');
 
                 if (hosting) {
                     players = [{ id: myId, name: myName, isBot: false, isHost: true, alive: true, role: null }];
@@ -3755,6 +3789,10 @@
 
                     // Listen for clients connecting
                     peer.on('connection', (conn) => {
+                        conn.on('error', (err) => {
+                            console.error("Host connection error:", err);
+                        });
+
                         conn.on('open', () => {
                             console.log('Client connected:', conn.peer);
                             // Connection registered, wait for JOIN message
@@ -3777,6 +3815,12 @@
             peer.on('error', (err) => {
                 console.error("PeerJS error:", err);
                 document.getElementById('lobby-chat-box').innerHTML += `<div style="color: var(--accent-crimson);">Network Error: ${err.type}</div>`;
+                
+                if (err.type === 'network') {
+                    const errBanner = document.getElementById('lobby-network-error-banner');
+                    if (errBanner) errBanner.classList.remove('hidden');
+                }
+
                 if (err.type === 'peer-unavailable') {
                     alert("Room not found. The host may have closed it or the code is incorrect.");
                     leaveLobby();
@@ -3789,6 +3833,10 @@
             document.getElementById('lobby-chat-box').innerHTML += `<div style="color: var(--text-muted);">Locating host ${roomCode}...</div>`;
 
             connToHost = peer.connect(hostId);
+
+            connToHost.on('error', (err) => {
+                console.error("Client connection error:", err);
+            });
 
             connToHost.on('open', () => {
                 document.getElementById('lobby-chat-box').innerHTML += `<div style="color: var(--accent-blue);">Handshaking with host...</div>`;
@@ -4025,7 +4073,7 @@
                 const pRoleInfo = p.role ? ROLES_INFO[p.role] : null;
                 const pTeam = pRoleInfo ? pRoleInfo.team : null;
                 // Determine if role should be visible (all Mafia members see each other's roles)
-                let showRole = !gameActive || p.id === recipientId ||
+                let showRole = (gameState === 'game_over') || p.id === recipientId ||
                     (recipientTeam === 'mafia' && pTeam === 'mafia');
 
                 return {
