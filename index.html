@@ -215,6 +215,20 @@
             font-weight: 700;
         }
 
+        .btn-danger {
+            background: linear-gradient(135deg, rgba(207, 42, 42, 0.25) 0%, rgba(207, 42, 42, 0.08) 100%);
+            border-color: rgba(207, 42, 42, 0.4);
+            color: #ffcccc;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, var(--accent-crimson) 0%, #a82020 100%);
+            border-color: var(--accent-crimson);
+            box-shadow: 0 0 20px var(--accent-crimson-glow);
+            color: #fff;
+            font-weight: 700;
+        }
+
         .btn:disabled {
             opacity: 0.4;
             cursor: not-allowed;
@@ -2462,6 +2476,7 @@
 
         <div class="lobby-buttons-row" style="margin-top: 25px;">
             <button class="btn" onclick="transitionScreen('solo-setup-screen', 'menu-screen')">Back</button>
+            <button class="btn" onclick="toggleSettingsModal(true)">Settings</button>
             <button class="btn btn-gold" id="btn-start-solo" style="flex-grow:1" onclick="startSoloGame()">Launch
                 Conspiracy</button>
         </div>
@@ -2727,6 +2742,7 @@
 
         <div class="lobby-buttons-row">
             <button class="btn" id="btn-leave-lobby" onclick="leaveLobby()">Leave Lobby</button>
+            <button class="btn" onclick="toggleSettingsModal(true)">Settings</button>
             <button class="btn btn-gold" id="btn-start-multiplayer" style="flex-grow:1" onclick="startMultiplayerGame()"
                 disabled>Waiting for Host...</button>
         </div>
@@ -2742,7 +2758,9 @@
             </div>
             <div class="phase-instructions" id="game-phase-instructions">Mafia: Click a player card to target them for
                 execution.</div>
-            <div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn btn-danger" onclick="confirmLeaveGame()"
+                    style="padding: 6px 12px; font-size: 0.8rem;">Leave Game</button>
                 <button class="btn" onclick="toggleSettingsModal(true)"
                     style="padding: 6px 12px; font-size: 0.8rem;">Settings</button>
             </div>
@@ -3024,6 +3042,7 @@
                 this.nightshiftAudio = null;
                 this.mafiaAudio = null;
                 this.roosterAudio = null;
+                this.endgameAudio = null;
             }
 
             init() {
@@ -3058,6 +3077,9 @@
                 this.roosterAudio = new Audio('rooster.mp3');
                 this.roosterAudio.loop = false;
 
+                this.endgameAudio = new Audio('endgame.mp3');
+                this.endgameAudio.loop = true;
+
                 this.updateAudioVolumes();
             }
 
@@ -3067,6 +3089,9 @@
                 this.nightshiftAudio.volume = this.musicVolume;
                 this.mafiaAudio.volume = this.musicVolume;
                 this.roosterAudio.volume = this.sfxVolume;
+                if (this.endgameAudio) {
+                    this.endgameAudio.volume = this.musicVolume;
+                }
             }
 
             setMusicVolume(val) {
@@ -3091,6 +3116,16 @@
                 this.bgmType = 'lobby';
                 this.lobbyAudio.currentTime = 0;
                 this.lobbyAudio.play().catch(e => console.log("Lobby BGM play blocked:", e));
+            }
+
+            playEndgameMusic() {
+                this.initAudio();
+                this.stopBgm();
+                this.bgmType = 'endgame';
+                if (this.endgameAudio) {
+                    this.endgameAudio.currentTime = 0;
+                    this.endgameAudio.play().catch(e => console.log("Endgame BGM play blocked:", e));
+                }
             }
 
             startNightMusic(isMafiaSide = false) {
@@ -3205,6 +3240,7 @@
                 if (this.lobbyAudio) this.lobbyAudio.pause();
                 if (this.nightshiftAudio) this.nightshiftAudio.pause();
                 if (this.mafiaAudio) this.mafiaAudio.pause();
+                if (this.endgameAudio) this.endgameAudio.pause();
                 this.isBgmPlaying = false;
                 this.bgmType = null;
             }
@@ -3502,7 +3538,7 @@
             audioSynth.playClick();
             document.getElementById(fromId).classList.add('hidden');
             document.getElementById(toId).classList.remove('hidden');
-            if (toId === 'menu-screen') {
+            if (toId === 'menu-screen' || toId === 'solo-setup-screen' || toId === 'multiplayer-lobby-screen') {
                 audioSynth.playLobbyMusic();
             }
         }
@@ -3860,8 +3896,13 @@
 
         function leaveLobby() {
             currentPhaseToken++;
-            audioSynth.playClick();
+            gameActive = false;
+            clearInterval(gameTimer);
             clearBotVotingTimers();
+            if (botChatTimer) clearTimeout(botChatTimer);
+            audioSynth.stopBgm();
+
+            audioSynth.playClick();
             if (peer) {
                 peer.destroy();
                 peer = null;
@@ -3872,11 +3913,28 @@
             isHost = false;
             document.getElementById('host-tag-indicator').classList.add('hidden');
 
+            // Hide all potential screens and overlays
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('game-over-screen').classList.add('hidden');
+            document.getElementById('multiplayer-lobby-screen').classList.add('hidden');
+            document.getElementById('solo-setup-screen').classList.add('hidden');
+            document.getElementById('settings-modal').classList.add('hidden');
+            document.getElementById('role-popup-overlay').classList.add('hidden');
+            document.getElementById('night-results-overlay').classList.add('hidden');
+            const phaseBlink = document.getElementById('phase-blink-overlay');
+            if (phaseBlink) phaseBlink.classList.add('hidden');
+
             // Clean URL query parameters
             const urlWithoutParams = window.location.protocol + "//" + window.location.host + window.location.pathname;
             window.history.replaceState({ path: urlWithoutParams }, '', urlWithoutParams);
 
             transitionScreen('multiplayer-lobby-screen', 'menu-screen');
+        }
+
+        function confirmLeaveGame() {
+            if (confirm("Are you sure you want to leave the current game? This will return you to the Main Menu.")) {
+                leaveLobby();
+            }
         }
 
         function copyRoomLink() {
@@ -6514,12 +6572,12 @@
                 winnerBanner.innerText = "TOWN WINS!";
                 winnerBanner.className = "winner-banner town-win";
                 winnerDetails.innerText = "All members of the syndicate have been brought to justice.";
-                audioSynth.playHeal();
+                audioSynth.playEndgameMusic();
             } else {
                 winnerBanner.innerText = "MAFIA WINS!";
                 winnerBanner.className = "winner-banner mafia-win";
                 winnerDetails.innerText = "The mafia has successfully seized control of the town.";
-                audioSynth.playDeath();
+                audioSynth.playEndgameMusic();
             }
 
             renderGameOverPage();
