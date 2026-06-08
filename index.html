@@ -3064,35 +3064,40 @@
             }
 
             initAudio() {
-                if (this.lobbyAudio) return;
-
-                this.lobbyAudio = new Audio('lobby.mp3');
-                this.lobbyAudio.loop = true;
-
-                this.nightshiftAudio = new Audio('nightshift.mp3');
-                this.nightshiftAudio.loop = true;
-
-                this.mafiaAudio = new Audio('mafia.mp3');
-                this.mafiaAudio.loop = true;
-
-                this.roosterAudio = new Audio('rooster.mp3');
-                this.roosterAudio.loop = false;
-
-                this.endgameAudio = new Audio('endgame.mp3');
-                this.endgameAudio.loop = true;
-
+                if (!this.lobbyAudio) {
+                    this.lobbyAudio = new Audio('lobby.mp3');
+                    this.lobbyAudio.loop = true;
+                    this.lobbyAudio.preload = 'auto';
+                }
+                if (!this.nightshiftAudio) {
+                    this.nightshiftAudio = new Audio('nightshift.mp3');
+                    this.nightshiftAudio.loop = true;
+                    this.nightshiftAudio.preload = 'auto';
+                }
+                if (!this.mafiaAudio) {
+                    this.mafiaAudio = new Audio('mafia.mp3');
+                    this.mafiaAudio.loop = true;
+                    this.mafiaAudio.preload = 'auto';
+                }
+                if (!this.roosterAudio) {
+                    this.roosterAudio = new Audio('rooster.mp3');
+                    this.roosterAudio.loop = false;
+                    this.roosterAudio.preload = 'auto';
+                }
+                if (!this.endgameAudio) {
+                    this.endgameAudio = new Audio('endgame.mp3');
+                    this.endgameAudio.loop = true;
+                    this.endgameAudio.preload = 'auto';
+                }
                 this.updateAudioVolumes();
             }
 
             updateAudioVolumes() {
-                if (!this.lobbyAudio) return;
-                this.lobbyAudio.volume = this.musicVolume;
-                this.nightshiftAudio.volume = this.musicVolume;
-                this.mafiaAudio.volume = this.musicVolume;
-                this.roosterAudio.volume = this.sfxVolume;
-                if (this.endgameAudio) {
-                    this.endgameAudio.volume = this.musicVolume;
-                }
+                if (this.lobbyAudio) this.lobbyAudio.volume = this.musicVolume;
+                if (this.nightshiftAudio) this.nightshiftAudio.volume = this.musicVolume;
+                if (this.mafiaAudio) this.mafiaAudio.volume = this.musicVolume;
+                if (this.roosterAudio) this.roosterAudio.volume = this.sfxVolume;
+                if (this.endgameAudio) this.endgameAudio.volume = this.musicVolume;
             }
 
             setMusicVolume(val) {
@@ -3115,8 +3120,10 @@
                 this.initAudio();
                 this.stopBgm();
                 this.bgmType = 'lobby';
-                this.lobbyAudio.currentTime = 0;
-                this.lobbyAudio.play().catch(e => console.log("Lobby BGM play blocked:", e));
+                if (this.lobbyAudio) {
+                    this.lobbyAudio.currentTime = 0;
+                    this.lobbyAudio.play().catch(e => console.log("Lobby BGM play blocked:", e));
+                }
             }
 
             playEndgameMusic() {
@@ -3125,7 +3132,17 @@
                 this.bgmType = 'endgame';
                 if (this.endgameAudio) {
                     this.endgameAudio.currentTime = 0;
-                    this.endgameAudio.play().catch(e => console.log("Endgame BGM play blocked:", e));
+                    this.endgameAudio.play().catch(e => {
+                        console.log("Endgame BGM play blocked:", e);
+                        // Fallback: retry playing on the next user click
+                        const playOnGesture = () => {
+                            if (this.bgmType === 'endgame' && this.endgameAudio) {
+                                this.endgameAudio.play().catch(err => console.log("Endgame BGM play gesture retry failed:", err));
+                            }
+                            document.removeEventListener('click', playOnGesture);
+                        };
+                        document.addEventListener('click', playOnGesture);
+                    });
                 }
             }
 
@@ -6910,7 +6927,11 @@
             descEl.style.opacity = 0;
 
             setTimeout(() => {
-                descEl.innerText = parsed.displayLog || log;
+                let displayMsg = parsed.displayLog || log;
+                if (parsed.actor === 'doctor') {
+                    displayMsg = "Doctor protected a player.";
+                }
+                descEl.innerText = displayMsg;
                 descEl.style.opacity = 1;
 
                 if (parsed.actionType === 'calm') {
