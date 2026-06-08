@@ -5083,20 +5083,28 @@
                     }
                 }
                 if (isMultiplayer) {
-                    // Send to host
-                    connToHost.send({
-                        type: 'ACTION_NIGHT',
-                        data: { targetId: currentTargetId }
-                    });
+                    if (isHost) {
+                        processPlayerNightAction(myId, currentTargetId);
+                    } else {
+                        // Send to host
+                        connToHost.send({
+                            type: 'ACTION_NIGHT',
+                            data: { targetId: currentTargetId }
+                        });
+                    }
                 } else {
                     processPlayerNightAction(myId, currentTargetId);
                 }
             } else if (gameState === 'day_vote' || gameState === 'day_trial_vote') {
                 if (isMultiplayer) {
-                    connToHost.send({
-                        type: 'ACTION_VOTE',
-                        data: { targetId: currentTargetId }
-                    });
+                    if (isHost) {
+                        processPlayerVote(myId, currentTargetId);
+                    } else {
+                        connToHost.send({
+                            type: 'ACTION_VOTE',
+                            data: { targetId: currentTargetId }
+                        });
+                    }
                 } else {
                     processPlayerVote(myId, currentTargetId);
                 }
