@@ -3736,8 +3736,12 @@
         function initializePeer(hosting) {
             myId = hosting ? 'host-' + roomCode : 'client-' + roomCode + '-' + Math.random().toString(36).substr(2, 6);
 
-            // Initialize PeerJS using defaults (automatically secure over HTTPS)
+            // Initialize PeerJS with explicit secure configuration and default cloud key
             peer = new Peer(myId, {
+                host: '0.peerjs.com',
+                port: 443,
+                secure: true,
+                key: 'peerjs',
                 debug: 1
             });
 
@@ -3928,7 +3932,22 @@
                     break;
 
                 case 'ROOM_STATE':
-                    players = packet.data.players;
+                    if (isHost) {
+                        packet.data.players.forEach(src => {
+                            const dest = players.find(p => p.id === src.id);
+                            if (dest) {
+                                dest.alive = src.alive;
+                                dest.name = src.name;
+                                dest.isBot = src.isBot;
+                                dest.isHost = src.isHost;
+                                if (src.role) dest.role = src.role;
+                            } else {
+                                players.push(src);
+                            }
+                        });
+                    } else {
+                        players = packet.data.players;
+                    }
                     deckConfig = packet.data.deckConfig;
                     timerConfig = packet.data.timerConfig;
                     updateLobbyUI();
@@ -3943,7 +3962,22 @@
                 case 'GAME_START':
                     // Launch game board
                     gameState = packet.data.gameState;
-                    players = packet.data.players;
+                    if (isHost) {
+                        packet.data.players.forEach(src => {
+                            const dest = players.find(p => p.id === src.id);
+                            if (dest) {
+                                dest.alive = src.alive;
+                                dest.name = src.name;
+                                dest.isBot = src.isBot;
+                                dest.isHost = src.isHost;
+                                if (src.role) dest.role = src.role;
+                            } else {
+                                players.push(src);
+                            }
+                        });
+                    } else {
+                        players = packet.data.players;
+                    }
                     // Assign my role
                     const me = players.find(p => p.id === myId);
                     myRole = me.role;
@@ -5389,7 +5423,7 @@
             // Framer Bot logic
             const framerBot = players.find(p => p.role === 'framer' && p.alive && p.isBot);
             if (framerBot && !nightActions.framer) {
-                const targets = players.filter(p => p.alive && ROLES_INFO[p.role].team !== 'mafia');
+                const targets = players.filter(p => p.alive && p.role && ROLES_INFO[p.role] && ROLES_INFO[p.role].team !== 'mafia');
                 if (targets.length > 0) {
                     const picked = targets[Math.floor(Math.random() * targets.length)];
                     nightActions.framer = picked.id;
@@ -5399,7 +5433,7 @@
             // Bard Bot logic
             const bardBot = players.find(p => p.role === 'bard' && p.alive && p.isBot);
             if (bardBot && !nightActions.bard) {
-                const targets = players.filter(p => p.alive && ROLES_INFO[p.role].team !== 'mafia');
+                const targets = players.filter(p => p.alive && p.role && ROLES_INFO[p.role] && ROLES_INFO[p.role].team !== 'mafia');
                 if (targets.length > 0) {
                     const picked = targets[Math.floor(Math.random() * targets.length)];
                     nightActions.bard = picked.id;
@@ -5432,7 +5466,25 @@
         function syncGameState(data) {
             const previousState = gameState;
             gameState = data.gameState;
-            players = data.players;
+            if (isHost) {
+                // Merge player states from data to keep roles intact on host
+                data.players.forEach(src => {
+                    const dest = players.find(p => p.id === src.id);
+                    if (dest) {
+                        dest.alive = src.alive;
+                        dest.name = src.name;
+                        dest.isBot = src.isBot;
+                        dest.isHost = src.isHost;
+                        if (src.role) {
+                            dest.role = src.role;
+                        }
+                    } else {
+                        players.push(src);
+                    }
+                });
+            } else {
+                players = data.players;
+            }
             roundsCount = data.roundsCount;
             if (data.votes) {
                 votes = data.votes;
