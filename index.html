@@ -3736,11 +3736,8 @@
         function initializePeer(hosting) {
             myId = hosting ? 'host-' + roomCode : 'client-' + roomCode + '-' + Math.random().toString(36).substr(2, 6);
 
-            // Initialize PeerJS with explicit secure configuration pointing to default broker over HTTPS
+            // Initialize PeerJS using defaults (automatically secure over HTTPS)
             peer = new Peer(myId, {
-                host: '0.peerjs.com',
-                port: 443,
-                secure: true,
                 debug: 1
             });
 
@@ -5724,10 +5721,8 @@
             // Set gameState AFTER broadcast so clients detect the transition
             gameState = 'day_defend';
 
-            if (!isMultiplayer) {
-                // Call client function directly in solo mode to avoid previousState collision
-                enterDefendingPhaseClient(defendantId, {});
-            }
+            // Call client function directly to avoid previousState collision
+            enterDefendingPhaseClient(defendantId, {});
         }
 
         function enterDefendingPhaseClient(defendantId, initialDefendVotes) {
@@ -5813,10 +5808,8 @@
             // Set gameState AFTER broadcast so clients detect the transition
             gameState = 'day_trial_vote';
 
-            if (!isMultiplayer) {
-                // Call client function directly in solo mode to avoid previousState collision
-                enterTrialVotingPhaseClient(defendantId, {});
-            }
+            // Call client function directly to avoid previousState collision
+            enterTrialVotingPhaseClient(defendantId, {});
         }
 
         function enterTrialVotingPhaseClient(defendantId, initialVotes) {
