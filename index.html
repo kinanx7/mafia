@@ -2951,6 +2951,13 @@
                 </div>
             </div>
 
+            <div class="setting-row hidden" id="mic-selector-row" style="flex-direction: column; align-items: stretch; gap: 8px;">
+                <label style="align-self: flex-start;">Microphone Input Device</label>
+                <select id="mic-device-select" class="text-input" onchange="changeMicrophone(this.value)" style="width: 100%; background: rgba(0,0,0,0.4); color: #fff; font-size: 0.85rem; padding: 6px; border: 1px solid var(--glass-border); border-radius: 6px; cursor: pointer;">
+                    <option value="">Default Microphone</option>
+                </select>
+            </div>
+
             <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.4;">
                 Audio is synthesized synthetically in your browser. If you don't hear anything, click "Test Sound" to
                 initialize Web Audio.
@@ -3449,6 +3456,17 @@
             const modal = document.getElementById('settings-modal');
             if (show) {
                 modal.classList.remove('hidden');
+                
+                // Show microphone settings in multiplayer only
+                const micRow = document.getElementById('mic-selector-row');
+                if (micRow) {
+                    if (isMultiplayer) {
+                        micRow.classList.remove('hidden');
+                        populateMicrophoneDevices();
+                    } else {
+                        micRow.classList.add('hidden');
+                    }
+                }
             } else {
                 modal.classList.add('hidden');
             }
@@ -4109,6 +4127,11 @@
                     document.getElementById('player-name-input').value = myName; // Update with resolved suffix
                     break;
 
+                case 'KICK_PLAYER':
+                    alert("You have been kicked from the lobby by the host.");
+                    leaveLobby();
+                    break;
+
                 case 'ROOM_STATE':
                     if (isHost) {
                         packet.data.players.forEach(src => {
@@ -4683,12 +4706,20 @@
                     badge = `<span class="host-badge" style="border-color:#777; color:#bbb;">BOT</span>`;
                 }
 
+                let kickBtnHTML = "";
+                if (isHost && p.id !== myId) {
+                    kickBtnHTML = `<button class="btn btn-danger" onclick="kickPlayer('${p.id}')" style="padding: 4px 8px; font-size: 0.7rem; margin-left: 8px;">Kick</button>`;
+                }
+
                 li.innerHTML = `
                     <div class="player-row-left">
                         <svg width="18" height="18" fill="var(--text-muted)" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.67-5.33-4-8-4z"/></svg>
                         <span>${escapeHTML(p.name)}</span>
                     </div>
-                    ${badge}
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        ${badge}
+                        ${kickBtnHTML}
+                    </div>
                 `;
                 listEl.appendChild(li);
             });
@@ -4705,6 +4736,33 @@
             // Trigger establishing voice connections with peers in the lobby
             if (isMultiplayer) {
                 connectVoiceToAllPeers();
+            }
+        }
+
+        function kickPlayer(playerId) {
+            if (!isHost) return;
+            audioSynth.playClick();
+
+            const p = players.find(x => x.id === playerId);
+            if (!p) return;
+
+            if (p.isBot) {
+                players = players.filter(x => x.id !== playerId);
+                broadcastRoomState();
+                updateLobbyUI();
+                broadcastSystemChat(`${p.name} (BOT) was removed by host.`);
+            } else {
+                const conn = peerConns[playerId];
+                if (conn) {
+                    conn.send({
+                        type: 'KICK_PLAYER',
+                        data: { reason: 'Kicked by host.' }
+                    });
+                    setTimeout(() => {
+                        conn.close();
+                        handlePlayerDisconnect(playerId);
+                    }, 200);
+                }
             }
         }
 
@@ -7747,6 +7805,81 @@
         }
 
         /* ------------------ PEERJS VOICE CHAT SYSTEM ------------------ */
+        async function populateMicrophoneDevices() {
+            const selectEl = document.getElementById('mic-device-select');
+            if (!selectEl) return;
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const audioInputs = devices.filter(d => d.kind === 'audioinput');
+                selectEl.innerHTML = "";
+                
+                if (audioInputs.length === 0) {
+                    const opt = document.createElement('option');
+                    opt.value = "";
+                    opt.innerText = "No microphones found";
+                    selectEl.appendChild(opt);
+                    return;
+                }
+
+                audioInputs.forEach((device, index) => {
+                    const opt = document.createElement('option');
+                    opt.value = device.deviceId;
+                    opt.innerText = device.label || `Microphone ${index + 1}`;
+                    selectEl.appendChild(opt);
+                });
+
+                // Match with currently active device if possible
+                if (localAudioStream && localAudioStream.getAudioTracks().length > 0) {
+                    const activeSettings = localAudioStream.getAudioTracks()[0].getSettings();
+                    if (activeSettings && activeSettings.deviceId) {
+                        selectEl.value = activeSettings.deviceId;
+                    }
+                }
+            } catch (err) {
+                console.error("Error enumerating devices:", err);
+            }
+        }
+
+        async function changeMicrophone(deviceId) {
+            console.log("Requesting microphone change to device:", deviceId);
+            try {
+                // Stop existing tracks
+                if (localAudioStream) {
+                    localAudioStream.getTracks().forEach(track => track.stop());
+                }
+
+                // Request new getUserMedia stream
+                localAudioStream = await navigator.mediaDevices.getUserMedia({
+                    audio: deviceId ? { deviceId: { exact: deviceId } } : true,
+                    video: false
+                });
+                console.log("New local microphone stream acquired successfully.");
+
+                // Replace track on all active calls
+                if (localAudioStream.getAudioTracks().length > 0) {
+                    const newTrack = localAudioStream.getAudioTracks()[0];
+                    for (let peerId in activeCalls) {
+                        const call = activeCalls[peerId];
+                        if (call && call.peerConnection) {
+                            const senders = call.peerConnection.getSenders();
+                            const sender = senders.find(s => s.track && s.track.kind === 'audio');
+                            if (sender) {
+                                sender.replaceTrack(newTrack).catch(e => {
+                                    console.error("Failed to replace track for peer:", peerId, e);
+                                });
+                            }
+                        }
+                    }
+                }
+
+                // Sync mute settings to the new track
+                updateVoiceStatus();
+            } catch (err) {
+                console.error("Failed to switch microphone device:", err);
+                alert("Could not switch to that microphone device. Please check system permissions.");
+            }
+        }
+
         async function initVoiceChat() {
             if (localAudioStream) return; // already initialized
             try {
