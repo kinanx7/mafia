@@ -7069,6 +7069,13 @@
             const msg = input.value.trim();
             if (!msg) return;
 
+            const me = players.find(p => p.id === myId);
+            if (me && !me.alive) {
+                alert("You are eliminated and cannot speak in chat!");
+                input.value = "";
+                return;
+            }
+
             audioSynth.playClick();
 
             // Check target channel (e.g. mafia night channel)
@@ -7137,7 +7144,7 @@
 
         function processGameChatPacket(senderId, msg, channel) {
             const sender = players.find(p => p.id === senderId);
-            if (!sender) return;
+            if (!sender || !sender.alive) return;
 
             // Log on Host
             addGameChatLog(sender.name, msg, channel, false);
