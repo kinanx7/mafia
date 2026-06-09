@@ -2017,7 +2017,10 @@
         /* Doctor Custom Shield Animations */
         .shield-shatter-container {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -2047,10 +2050,12 @@
                 transform: translateX(0) rotate(0deg);
                 opacity: 1;
             }
+
             25% {
                 transform: translateX(-5px) rotate(-5deg);
                 opacity: 1;
             }
+
             100% {
                 transform: translateX(-40px) translateY(60px) rotate(-45deg);
                 opacity: 0;
@@ -2062,10 +2067,12 @@
                 transform: translateX(0) rotate(0deg);
                 opacity: 1;
             }
+
             25% {
                 transform: translateX(5px) rotate(5deg);
                 opacity: 1;
             }
+
             100% {
                 transform: translateX(40px) translateY(60px) rotate(45deg);
                 opacity: 0;
@@ -2074,7 +2081,10 @@
 
         .shield-shiny-container {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -2094,6 +2104,7 @@
                 transform: scale(1);
                 filter: drop-shadow(0 0 5px rgba(42, 207, 122, 0.6));
             }
+
             100% {
                 transform: scale(1.1);
                 filter: drop-shadow(0 0 25px rgba(42, 207, 122, 0.95)) brightness(1.2);
@@ -2118,11 +2129,13 @@
                 left: -150px;
                 opacity: 1;
             }
+
             70% {
                 left: 0px;
                 opacity: 1;
                 transform: scaleX(1);
             }
+
             100% {
                 left: 5px;
                 opacity: 0;
@@ -2147,10 +2160,12 @@
                 transform: scale(0.5);
                 opacity: 1;
             }
+
             50% {
                 transform: scale(3.5);
                 opacity: 1;
             }
+
             100% {
                 transform: scale(6);
                 opacity: 0;
@@ -2681,7 +2696,9 @@
                             <li>Disable your adblocker/Shield for this site.</li>
                             <li>Reload the page and try hosting/joining again.</li>
                             <li style="margin-top: 4px;">
-                                Alternatively, click <a href="#" onclick="toggleSettingsModal(true); return false;" style="color: var(--accent-gold); text-decoration: underline; font-weight: bold; cursor: pointer;">Configure Broker</a> to set up a custom signaling server.
+                                Alternatively, click <a href="#" onclick="toggleSettingsModal(true); return false;"
+                                    style="color: var(--accent-gold); text-decoration: underline; font-weight: bold; cursor: pointer;">Configure
+                                    Broker</a> to set up a custom signaling server.
                             </li>
                         </ul>
                     </div>
@@ -3132,31 +3149,41 @@
             </div>
 
             <!-- Multiplayer Connection Settings -->
-            <div id="multiplayer-connection-settings" class="hidden" style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 15px; margin-top: 15px; margin-bottom: 15px;">
-                <h3 class="heading-serif" style="font-size: 1rem; color: var(--accent-gold); margin-bottom: 10px; text-align: left;">Signaling Broker Settings</h3>
-                
-                <div class="setting-row" style="flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 12px;">
+            <div id="multiplayer-connection-settings" class="hidden"
+                style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 15px; margin-top: 15px; margin-bottom: 15px;">
+                <h3 class="heading-serif"
+                    style="font-size: 1rem; color: var(--accent-gold); margin-bottom: 10px; text-align: left;">Signaling
+                    Broker Settings</h3>
+
+                <div class="setting-row"
+                    style="flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 12px;">
                     <div style="display: flex; gap: 8px;">
                         <div style="flex: 2; display: flex; flex-direction: column; gap: 4px;">
-                            <label style="font-size: 0.75rem; color: var(--text-muted); text-align: left;">Broker Host</label>
-                            <input type="text" id="peerjs-host" class="text-input" placeholder="0.peerjs.com" style="width: 100%; padding: 6px 10px; font-size: 0.85rem; height: auto;">
+                            <label style="font-size: 0.75rem; color: var(--text-muted); text-align: left;">Broker
+                                Host</label>
+                            <input type="text" id="peerjs-host" class="text-input" placeholder="0.peerjs.com"
+                                style="width: 100%; padding: 6px 10px; font-size: 0.85rem; height: auto;">
                         </div>
                         <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
                             <label style="font-size: 0.75rem; color: var(--text-muted); text-align: left;">Port</label>
-                            <input type="number" id="peerjs-port" class="text-input" placeholder="443" style="width: 100%; padding: 6px 10px; font-size: 0.85rem; height: auto;">
+                            <input type="number" id="peerjs-port" class="text-input" placeholder="443"
+                                style="width: 100%; padding: 6px 10px; font-size: 0.85rem; height: auto;">
                         </div>
                     </div>
                     <div style="display: flex; gap: 8px;">
                         <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
                             <label style="font-size: 0.75rem; color: var(--text-muted); text-align: left;">Path</label>
-                            <input type="text" id="peerjs-path" class="text-input" placeholder="/" style="width: 100%; padding: 6px 10px; font-size: 0.85rem; height: auto;">
+                            <input type="text" id="peerjs-path" class="text-input" placeholder="/"
+                                style="width: 100%; padding: 6px 10px; font-size: 0.85rem; height: auto;">
                         </div>
                         <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
                             <label style="font-size: 0.75rem; color: var(--text-muted); text-align: left;">Key</label>
-                            <input type="text" id="peerjs-key" class="text-input" placeholder="peerjs" style="width: 100%; padding: 6px 10px; font-size: 0.85rem; height: auto;">
+                            <input type="text" id="peerjs-key" class="text-input" placeholder="peerjs"
+                                style="width: 100%; padding: 6px 10px; font-size: 0.85rem; height: auto;">
                         </div>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 0.85rem;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 0.85rem;">
                         <span style="color: var(--text-main);">Secure Connection (SSL)</span>
                         <label class="role-switch">
                             <input type="checkbox" id="peerjs-secure" checked>
@@ -3164,8 +3191,12 @@
                         </label>
                     </div>
                     <div style="display: flex; gap: 8px; margin-top: 12px;">
-                        <button class="btn btn-gold" onclick="saveSignalingSettings()" style="flex: 1; font-size: 0.75rem; padding: 6px 12px; height: auto;">Save & Reconnect</button>
-                        <button class="btn" onclick="resetSignalingSettings()" style="flex: 1; font-size: 0.75rem; padding: 6px 12px; height: auto; background: rgba(255,255,255,0.05);">Reset Default</button>
+                        <button class="btn btn-gold" onclick="saveSignalingSettings()"
+                            style="flex: 1; font-size: 0.75rem; padding: 6px 12px; height: auto;">Save &
+                            Reconnect</button>
+                        <button class="btn" onclick="resetSignalingSettings()"
+                            style="flex: 1; font-size: 0.75rem; padding: 6px 12px; height: auto; background: rgba(255,255,255,0.05);">Reset
+                            Default</button>
                     </div>
                 </div>
             </div>
@@ -3705,19 +3736,27 @@
 
         function saveSignalingSettings() {
             audioSynth.playClick();
-            const host = document.getElementById('peerjs-host').value.trim() || '0.peerjs.com';
-            const port = document.getElementById('peerjs-port').value.trim() || '443';
-            const path = document.getElementById('peerjs-path').value.trim() || '/';
-            const key = document.getElementById('peerjs-key').value.trim() || 'peerjs';
+            const host = document.getElementById('peerjs-host').value.trim();
+            const port = document.getElementById('peerjs-port').value.trim();
+            const path = document.getElementById('peerjs-path').value.trim();
+            const key = document.getElementById('peerjs-key').value.trim();
             const secure = document.getElementById('peerjs-secure').checked;
 
-            localStorage.setItem('peerjs-host', host);
-            localStorage.setItem('peerjs-port', port);
-            localStorage.setItem('peerjs-path', path);
-            localStorage.setItem('peerjs-key', key);
+            // Determine if these are non-default custom values
+            const isCustomHost = host && host !== '0.peerjs.com';
+            const isCustomPort = port && port !== '443';
+            const isCustomPath = path && path !== '/';
+            const isCustomKey = key && key !== 'peerjs';
+
+            // Only persist truly custom values; clear defaults so we use native cloud routing
+            if (isCustomHost) { localStorage.setItem('peerjs-host', host); } else { localStorage.removeItem('peerjs-host'); }
+            if (isCustomPort) { localStorage.setItem('peerjs-port', port); } else { localStorage.removeItem('peerjs-port'); }
+            if (isCustomPath) { localStorage.setItem('peerjs-path', path); } else { localStorage.removeItem('peerjs-path'); }
+            if (isCustomKey) { localStorage.setItem('peerjs-key', key); } else { localStorage.removeItem('peerjs-key'); }
+            // Secure is always saved as it is a valid override even on default host
             localStorage.setItem('peerjs-secure', secure ? 'true' : 'false');
 
-            console.log("Saved signaling settings:", { host, port, path, key, secure });
+            console.log("Saved signaling settings (custom host:", isCustomHost, "):", { host, port, path, key, secure });
 
             // If we are currently in the lobby screen, reconnect using new credentials
             const lobbyScreen = document.getElementById('multiplayer-lobby-screen');
@@ -3728,12 +3767,12 @@
                 }
                 peerRetryCount = 0; // Reset retries
                 if (peer) {
-                    try { peer.destroy(); } catch (e) {}
+                    try { peer.destroy(); } catch (e) { }
                     peer = null;
                 }
                 initializePeer(isHost);
             }
-            
+
             // Hide the error banner when user attempts to reconnect
             const errBanner = document.getElementById('lobby-network-error-banner');
             if (errBanner) errBanner.classList.add('hidden');
@@ -3747,14 +3786,32 @@
             document.getElementById('peerjs-key').value = 'peerjs';
             document.getElementById('peerjs-secure').checked = true;
 
+            // Clear ALL saved values so initializePeer uses true default cloud routing
             localStorage.removeItem('peerjs-host');
             localStorage.removeItem('peerjs-port');
             localStorage.removeItem('peerjs-path');
             localStorage.removeItem('peerjs-key');
             localStorage.removeItem('peerjs-secure');
 
-            console.log("Reset signaling settings to default.");
-            saveSignalingSettings(); // Apply defaults and trigger reconnect
+            console.log("Reset signaling settings to default (cloud routing).");
+
+            // Trigger reconnect directly without writing defaults to localStorage
+            const lobbyScreen = document.getElementById('multiplayer-lobby-screen');
+            if (lobbyScreen && !lobbyScreen.classList.contains('hidden')) {
+                const chatBox = document.getElementById('lobby-chat-box');
+                if (chatBox) {
+                    chatBox.innerHTML += `<div style="color: var(--accent-gold); font-style: italic;">Reset to default. Reconnecting to signaling broker...</div>`;
+                }
+                peerRetryCount = 0;
+                if (peer) {
+                    try { peer.destroy(); } catch (e) { }
+                    peer = null;
+                }
+                initializePeer(isHost);
+            }
+
+            const errBanner = document.getElementById('lobby-network-error-banner');
+            if (errBanner) errBanner.classList.add('hidden');
         }
 
         function changeVolume(type, val) {
@@ -3868,6 +3925,15 @@
         let localAudioStream = null;
         let activeCalls = {};
         let isMuted = false;
+
+        // Startup cleanup: remove stale default peerjs settings stored by older code versions
+        // so initializePeer() uses true default cloud routing instead of explicit host overrides
+        (function cleanupStalePeerjsDefaults() {
+            if (localStorage.getItem('peerjs-host') === '0.peerjs.com') localStorage.removeItem('peerjs-host');
+            if (localStorage.getItem('peerjs-port') === '443') localStorage.removeItem('peerjs-port');
+            if (localStorage.getItem('peerjs-path') === '/') localStorage.removeItem('peerjs-path');
+            if (localStorage.getItem('peerjs-key') === 'peerjs') localStorage.removeItem('peerjs-key');
+        })();
         let deckConfig = {
             mafia: 1,
             doctor: true,
@@ -4159,7 +4225,7 @@
                 // NEW: Safely exit if the browser blocks mic access (e.g., non-HTTPS)
                 if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                     console.warn("Microphone API blocked (requires HTTPS). Voice chat disabled.");
-                    return; 
+                    return;
                 }
                 localAudioStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
                 console.log("Local microphone stream acquired.");
@@ -4198,38 +4264,55 @@
 
             console.log("Initializing PeerJS with ID:", myId, "Retry Count:", peerRetryCount);
 
-            // Construct peer configuration loading options from localStorage or falling back to default cloud settings
+            // Load any custom signaling broker settings from localStorage
+            // Keys are only present if user explicitly configured a custom server
             const savedHost = localStorage.getItem('peerjs-host');
             const savedPort = localStorage.getItem('peerjs-port');
-            const savedSecure = localStorage.getItem('peerjs-secure');
             const savedPath = localStorage.getItem('peerjs-path');
             const savedKey = localStorage.getItem('peerjs-key');
+            const hasCustomBroker = !!savedHost; // Custom broker only if host was explicitly set
 
-            // UPDATED: Rely on default cloud routing and reliable STUN servers
-            const peerOptions = {
-                debug: 1,
-                secure: savedSecure !== null ? savedSecure === 'true' : true,
-                config: {
-                    iceServers: [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' },
-                        { urls: 'stun:global.stun.twilio.com:3478' }
-                    ]
-                }
-            };
+            let peer_options;
+            if (hasCustomBroker) {
+                // Use custom signaling server - user explicitly configured one
+                peer_options = {
+                    host: savedHost.trim(),
+                    port: parseInt(savedPort) || 443,
+                    path: savedPath ? savedPath.trim() : '/',
+                    key: savedKey ? savedKey.trim() : 'peerjs',
+                    secure: true,
+                    debug: 1,
+                    config: {
+                        iceServers: [
+                            { urls: 'stun:stun.l.google.com:19302' },
+                            { urls: 'stun:stun1.l.google.com:19302' },
+                            { urls: 'stun:global.stun.twilio.com:3478' }
+                        ]
+                    }
+                };
+                console.log("Using custom signaling broker:", peer_options.host + ':' + peer_options.port);
+            } else {
+                // Use default PeerJS cloud routing - do NOT pass host/port/path/key
+                // This lets the PeerJS library resolve 0.peerjs.com automatically
+                peer_options = {
+                    debug: 1,
+                    config: {
+                        iceServers: [
+                            { urls: 'stun:stun.l.google.com:19302' },
+                            { urls: 'stun:stun1.l.google.com:19302' },
+                            { urls: 'stun:global.stun.twilio.com:3478' }
+                        ]
+                    }
+                };
+                console.log("Using default PeerJS cloud routing.");
+            }
 
-            // Only override default cloud routing if custom settings are configured
-            if (savedHost) peerOptions.host = savedHost.trim();
-            if (savedPort) peerOptions.port = parseInt(savedPort) || 443;
-            if (savedPath) peerOptions.path = savedPath.trim();
-            if (savedKey) peerOptions.key = savedKey.trim();
-
-            peer = new Peer(myId, peerOptions);
+            peer = new Peer(myId, peer_options);
 
             peer.on('open', (id) => {
                 console.log('PeerJS connection opened with ID:', id);
                 peerRetryCount = 0; // Reset retry count
-                
+
                 // Hide network error banner on successful connection
                 const errBanner = document.getElementById('lobby-network-error-banner');
                 if (errBanner) errBanner.classList.add('hidden');
@@ -4300,7 +4383,7 @@
                         const oldRoomCode = roomCode;
                         roomCode = generateRandomRoomCode();
                         console.warn(`ID host-${oldRoomCode} is already taken. Regenerating room code: ${roomCode}`);
-                        
+
                         document.getElementById('lobby-code-box').innerText = roomCode;
                         const lobbyCodeInput = document.getElementById('join-room-code-input');
                         if (lobbyCodeInput) {
@@ -4309,10 +4392,10 @@
                         if (chatBox) {
                             chatBox.innerHTML += `<div style="color: var(--accent-gold); font-style: italic;">Room code ${oldRoomCode} was taken. Regenerating: ${roomCode}...</div>`;
                         }
-                        
+
                         peerRetryTimeout = setTimeout(() => {
                             if (peer) {
-                                try { peer.destroy(); } catch (e) {}
+                                try { peer.destroy(); } catch (e) { }
                             }
                             initializePeer(true);
                         }, 1000);
@@ -4320,7 +4403,7 @@
                         console.warn(`Client ID conflict. Retrying with a new random client ID...`);
                         peerRetryTimeout = setTimeout(() => {
                             if (peer) {
-                                try { peer.destroy(); } catch (e) {}
+                                try { peer.destroy(); } catch (e) { }
                             }
                             initializePeer(false);
                         }, 1000);
@@ -7679,20 +7762,20 @@
                                 if (isSuccess) {
                                     // Shiny shield stops a bullet animation
                                     backTarget.classList.add('recap-glow-heal');
-                                    
+
                                     const shinyContainer = document.createElement('div');
                                     shinyContainer.className = 'shield-shiny-container';
-                                    
+
                                     const shieldEl = document.createElement('div');
                                     shieldEl.className = 'shield-shiny';
                                     shieldEl.innerText = "🛡️";
-                                    
+
                                     const bulletEl = document.createElement('div');
                                     bulletEl.className = 'shield-bullet';
-                                    
+
                                     const flashEl = document.createElement('div');
                                     flashEl.className = 'shield-impact-flash';
-                                    
+
                                     shinyContainer.appendChild(shieldEl);
                                     shinyContainer.appendChild(bulletEl);
                                     shinyContainer.appendChild(flashEl);
@@ -7706,18 +7789,18 @@
                                 } else {
                                     // Shield broke animation
                                     backTarget.style.borderColor = 'var(--accent-crimson)';
-                                    
+
                                     const shatterContainer = document.createElement('div');
                                     shatterContainer.className = 'shield-shatter-container';
-                                    
+
                                     const leftShield = document.createElement('div');
                                     leftShield.className = 'shield-part shield-left';
                                     leftShield.innerText = "🛡️";
-                                    
+
                                     const rightShield = document.createElement('div');
                                     rightShield.className = 'shield-part shield-right';
                                     rightShield.innerText = "🛡️";
-                                    
+
                                     shatterContainer.appendChild(leftShield);
                                     shatterContainer.appendChild(rightShield);
                                     backTarget.appendChild(shatterContainer);
@@ -8441,7 +8524,7 @@
                     console.warn(`Voice call with ${remotePeerId} timed out waiting for stream. Reconnecting...`);
                     try {
                         call.close();
-                    } catch (e) {}
+                    } catch (e) { }
                     removeRemoteAudio(remotePeerId);
                     delete activeCalls[remotePeerId];
                 }
