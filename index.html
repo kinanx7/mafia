@@ -3015,6 +3015,22 @@
                         </div>
                     </div>
 
+                    <!-- Medium Toggle -->
+                    <div class="deck-row">
+                        <div class="role-badge-info">
+                            <span class="role-indicator-dot dot-town"
+                                style="background-color: #7b2cbf; box-shadow: 0 0 8px #7b2cbf"></span>
+                            <span class="role-label-name">Medium</span>
+                        </div>
+                        <div class="role-controls">
+                            <label class="role-switch">
+                                <input type="checkbox" id="solo-role-medium-toggle" checked
+                                    onchange="recalculateSoloDeck()">
+                                <span class="switch-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
                     <!-- Villager Dynamic Count Display -->
                     <div class="deck-row">
                         <div class="role-badge-info">
@@ -3049,7 +3065,8 @@
             <div style="display: flex; gap: 10px; align-items: flex-start;">
                 <span style="font-size: 1.4rem; line-height: 1; flex-shrink: 0;">🔌</span>
                 <div style="flex: 1;">
-                    <h4 style="color: #ff4d4d; font-weight: bold; margin-bottom: 6px; font-size: 0.95rem;">Signaling
+                    <h4 style="color: #ff4d4d; font-weight: bold; margin-bottom: 6px; font-size: 0.95rem;">
+                        Signaling
                         Broker Unreachable</h4>
                     <p style="font-size: 0.8rem; line-height: 1.5; color: var(--text-muted); margin-bottom: 10px;">
                         The public PeerJS server (<code
@@ -3097,7 +3114,8 @@
                             <li>Start command: <code
                                     style="background:rgba(0,0,0,0.3);padding:1px 4px;border-radius:3px;">node src/index.js</code>
                             </li>
-                            <li>Click <strong>Deploy</strong> — copy the <code>https://…onrender.com</code> URL</li>
+                            <li>Click <strong>Deploy</strong> — copy the <code>https://…onrender.com</code> URL
+                            </li>
                             <li>Paste it in the box above and click <strong>Retry</strong></li>
                         </ol>
                     </details>
@@ -3113,7 +3131,8 @@
                     <span id="host-tag-indicator" class="host-badge hidden">HOST</span>
                 </div>
 
-                <div style="font-size: 0.85rem; color: var(--text-muted);">Share this Room Code with friends:</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">Share this Room Code with friends:
+                </div>
                 <div class="lobby-code-display" id="lobby-code-box" onclick="copyRoomLink()"
                     title="Click to copy join link!">MAFIA-XXXXX</div>
 
@@ -3323,6 +3342,22 @@
                         </div>
                     </div>
 
+                    <!-- Medium Toggle -->
+                    <div class="deck-row">
+                        <div class="role-badge-info">
+                            <span class="role-indicator-dot dot-town"
+                                style="background-color: #7b2cbf; box-shadow: 0 0 8px #7b2cbf"></span>
+                            <span class="role-label-name">Medium</span>
+                        </div>
+                        <div class="role-controls">
+                            <label class="role-switch">
+                                <input type="checkbox" id="multi-role-medium-toggle" class="host-only-control" checked
+                                    onchange="onMultiSettingChanged()">
+                                <span class="switch-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
                     <!-- Villager count display -->
                     <div class="deck-row">
                         <div class="role-badge-info">
@@ -3345,7 +3380,8 @@
         <!-- Lobby Chat & Connect Controls -->
         <div class="lobby-chat-wrapper">
             <div class="lobby-chat-messages" id="lobby-chat-box">
-                <div style="color: var(--text-muted); font-style: italic;">Welcome to the Lobby chat room...</div>
+                <div style="color: var(--text-muted); font-style: italic;">Welcome to the Lobby chat room...
+                </div>
             </div>
             <div class="lobby-chat-input-row">
                 <input type="text" id="lobby-chat-input" class="text-input" placeholder="Type a message..."
@@ -3371,7 +3407,8 @@
                 <div class="phase-badge" id="game-phase-name">Night 1</div>
                 <div class="timer-badge" id="game-phase-timer">30</div>
             </div>
-            <div class="phase-instructions" id="game-phase-instructions">Mafia: Click a player card to target them for
+            <div class="phase-instructions" id="game-phase-instructions">Mafia: Click a player card to target
+                them for
                 execution.</div>
             <div style="display: flex; gap: 8px;">
                 <button class="btn btn-gold hidden" id="btn-game-mute-mic" onclick="toggleMuteMic()"
@@ -3425,7 +3462,8 @@
                     <button class="btn" id="btn-send-game-chat" onclick="sendGameChatMsg()">Send</button>
                 </div>
 
-                <div class="action-needed-prompt hidden" id="game-action-prompt">YOU HAVE A DECISION TO MAKE! CLICK ON A
+                <div class="action-needed-prompt hidden" id="game-action-prompt">YOU HAVE A DECISION TO MAKE!
+                    CLICK ON A
                     TARGET CARD.</div>
             </div>
 
@@ -3472,7 +3510,8 @@
                 Conspiracy Concluded</h1>
 
             <div class="winner-banner town-win" id="game-winner-announcement">TOWN WINS!</div>
-            <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 10px;" id="game-winner-details">All
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 10px;" id="game-winner-details">
+                All
                 Mafia members have been brought to justice.</p>
 
             <!-- Two Sides Layout: Winners vs Losers -->
@@ -3551,7 +3590,8 @@
             <div id="multiplayer-connection-settings" class="hidden"
                 style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 15px; margin-top: 15px; margin-bottom: 15px;">
                 <h3 class="heading-serif"
-                    style="font-size: 1rem; color: var(--accent-gold); margin-bottom: 10px; text-align: left;">Signaling
+                    style="font-size: 1rem; color: var(--accent-gold); margin-bottom: 10px; text-align: left;">
+                    Signaling
                     Broker Settings</h3>
 
                 <div class="setting-row"
@@ -3601,12 +3641,14 @@
             </div>
 
             <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.4;">
-                Audio is synthesized synthetically in your browser. If you don't hear anything, click "Test Sound" to
+                Audio is synthesized synthetically in your browser. If you don't hear anything, click "Test
+                Sound" to
                 initialize Web Audio.
             </p>
 
             <div style="display: flex; gap: 15px;">
-                <button class="btn btn-gold" onclick="audioSynth.playHeal()" style="flex-grow: 1;">Test Sound</button>
+                <button class="btn btn-gold" onclick="audioSynth.playHeal()" style="flex-grow: 1;">Test
+                    Sound</button>
                 <button class="btn" onclick="toggleSettingsModal(false)" style="flex-grow: 1;">Done</button>
             </div>
         </div>
@@ -3647,7 +3689,8 @@
             <div id="night-anim-stage"
                 style="display: flex; align-items: center; justify-content: center; gap: 35px; min-height: 280px; width: 100%; position: relative; margin: 20px 0;">
                 <!-- Left Card: Actor -->
-                <div id="night-anim-actor-container" style="position: relative; transition: all 0.5s ease;"></div>
+                <div id="night-anim-actor-container" style="position: relative; transition: all 0.5s ease;">
+                </div>
 
                 <!-- Action Effect Middle -->
                 <div id="night-anim-effect-container"
@@ -3661,7 +3704,8 @@
                 </div>
 
                 <!-- Right Card: Target -->
-                <div id="night-anim-target-container" style="position: relative; transition: all 0.5s ease;"></div>
+                <div id="night-anim-target-container" style="position: relative; transition: all 0.5s ease;">
+                </div>
             </div>
 
             <!-- Description / Log Message -->
@@ -3696,6 +3740,7 @@
             vigilante: `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`,
             scout: `<svg viewBox="0 0 24 24"><path d="M12 2c-4 0-7 3.3-7 7 0 5.2 7 13 7 13s7-7.8 7-13c0-3.7-3-7-7-7zm0 9.5c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5z"/></svg>`,
             jester: `<svg viewBox="0 0 24 24"><path d="M12 2c-5.5 0-10 4.5-10 10s4.5 10 10 10 10-4.5 10-10-4.5-10-10-10zm-1 5h2v2-h-2v-2zm0 4h2v6h-2v-6z"/></svg>`,
+            medium: `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></svg>`,
             cardback: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
         };
 
@@ -4353,6 +4398,13 @@
                 desc: 'Get yourself exiled by the Town during the day voting phase.',
                 winCondition: 'Tricking the Town into exiling you. (Does not end the game).',
                 isSpecial: false
+            },
+            medium: {
+                name: 'Medium',
+                team: 'town',
+                desc: 'You can communicate with the dead at night. Dead players can speak to you and you can hear them.',
+                winCondition: 'Eliminate all Mafia members to secure peace.',
+                isSpecial: true
             }
         };
 
@@ -4383,6 +4435,7 @@
             vigilante: true,
             scout: true,
             jester: true,
+            medium: true,
             revealRolesOnDeath: true
         };
         let timerConfig = {
@@ -4451,6 +4504,7 @@
             document.getElementById('multi-role-vigilante-toggle').disabled = false;
             document.getElementById('multi-role-scout-toggle').disabled = false;
             document.getElementById('multi-role-jester-toggle').disabled = false;
+            document.getElementById('multi-role-medium-toggle').disabled = false;
             document.getElementById('multi-reveal-roles-toggle').disabled = false;
             document.getElementById('settings-lock-title').innerText = "Room Settings";
 
@@ -4493,6 +4547,7 @@
             document.getElementById('multi-role-vigilante-toggle').disabled = true;
             document.getElementById('multi-role-scout-toggle').disabled = true;
             document.getElementById('multi-role-jester-toggle').disabled = true;
+            document.getElementById('multi-role-medium-toggle').disabled = true;
             document.getElementById('multi-reveal-roles-toggle').disabled = true;
             document.getElementById('settings-lock-title').innerText = "Room Settings (Locked)";
 
@@ -4528,6 +4583,7 @@
             const vigilanteEnabled = document.getElementById('solo-role-vigilante-toggle').checked;
             const scoutEnabled = document.getElementById('solo-role-scout-toggle').checked;
             const jesterEnabled = document.getElementById('solo-role-jester-toggle').checked;
+            const mediumEnabled = document.getElementById('solo-role-medium-toggle').checked;
             const revealRolesOnDeath = document.getElementById('solo-reveal-roles-toggle').checked;
 
             deckConfig.revealRolesOnDeath = revealRolesOnDeath;
@@ -4539,7 +4595,8 @@
                 (bardEnabled ? 1 : 0) +
                 (vigilanteEnabled ? 1 : 0) +
                 (scoutEnabled ? 1 : 0) +
-                (jesterEnabled ? 1 : 0);
+                (jesterEnabled ? 1 : 0) +
+                (mediumEnabled ? 1 : 0);
 
             const warningEl = document.getElementById('solo-role-warning');
             const startBtn = document.getElementById('btn-start-solo');
@@ -4616,6 +4673,7 @@
                 document.getElementById('multi-role-vigilante-toggle').disabled = true;
                 document.getElementById('multi-role-scout-toggle').disabled = true;
                 document.getElementById('multi-role-jester-toggle').disabled = true;
+                document.getElementById('multi-role-medium-toggle').disabled = true;
                 document.getElementById('settings-lock-title').innerText = "Room Settings (Locked)";
 
                 document.getElementById('btn-start-multiplayer').innerText = "Waiting for Host...";
@@ -4638,6 +4696,7 @@
                 document.getElementById('multi-role-vigilante-toggle').disabled = false;
                 document.getElementById('multi-role-scout-toggle').disabled = false;
                 document.getElementById('multi-role-jester-toggle').disabled = false;
+                document.getElementById('multi-role-medium-toggle').disabled = false;
 
                 document.getElementById('btn-start-multiplayer').innerText = "Start Game";
                 document.getElementById('btn-start-multiplayer').disabled = false;
@@ -5533,6 +5592,7 @@
             deckConfig.vigilante = document.getElementById('multi-role-vigilante-toggle').checked;
             deckConfig.scout = document.getElementById('multi-role-scout-toggle').checked;
             deckConfig.jester = document.getElementById('multi-role-jester-toggle').checked;
+            deckConfig.medium = document.getElementById('multi-role-medium-toggle').checked;
             deckConfig.revealRolesOnDeath = document.getElementById('multi-reveal-roles-toggle').checked;
             broadcastRoomState();
         }
@@ -5547,6 +5607,7 @@
             const vigilanteEnabled = deckConfig.vigilante;
             const scoutEnabled = deckConfig.scout;
             const jesterEnabled = deckConfig.jester;
+            const mediumEnabled = deckConfig.medium;
 
             let specialCount = mafiaCount +
                 (docEnabled ? 1 : 0) +
@@ -5555,7 +5616,8 @@
                 (bardEnabled ? 1 : 0) +
                 (vigilanteEnabled ? 1 : 0) +
                 (scoutEnabled ? 1 : 0) +
-                (jesterEnabled ? 1 : 0);
+                (jesterEnabled ? 1 : 0) +
+                (mediumEnabled ? 1 : 0);
 
             const warningEl = document.getElementById('multi-role-warning');
             const startBtn = document.getElementById('btn-start-multiplayer');
@@ -5600,6 +5662,8 @@
             document.getElementById('multi-role-vigilante-toggle').checked = deckConfig.vigilante;
             document.getElementById('multi-role-scout-toggle').checked = deckConfig.scout;
             document.getElementById('multi-role-jester-toggle').checked = deckConfig.jester;
+            const medToggle = document.getElementById('multi-role-medium-toggle');
+            if (medToggle) medToggle.checked = deckConfig.medium;
             document.getElementById('multi-reveal-roles-toggle').checked = deckConfig.revealRolesOnDeath;
             document.getElementById('multi-role-villager-display').innerText = villagerCount;
             document.getElementById('multi-deck-summary').innerText = `Total Players: ${totalPlayers}`;
@@ -5811,23 +5875,18 @@
             const total = players.length;
             const rolesDeck = [];
 
-            // Add Mafia
+            // Add Roles based on UI Toggles (No more hardcoding!)
             for (let i = 0; i < deckConfig.mafia; i++) rolesDeck.push('mafia');
-            // Add Doctor
             if (document.getElementById('solo-role-doctor-toggle').checked) rolesDeck.push('doctor');
-            // Add Detective
             if (document.getElementById('solo-role-detective-toggle').checked) rolesDeck.push('detective');
-            // Add Framer
             if (document.getElementById('solo-role-framer-toggle').checked) rolesDeck.push('framer');
-            // Add Bard
             if (document.getElementById('solo-role-bard-toggle').checked) rolesDeck.push('bard');
-            // Add Vigilante
             if (document.getElementById('solo-role-vigilante-toggle').checked) rolesDeck.push('vigilante');
-            // Add Scout
             if (document.getElementById('solo-role-scout-toggle').checked) rolesDeck.push('scout');
-            // Add Jester
             if (document.getElementById('solo-role-jester-toggle').checked) rolesDeck.push('jester');
-            // Add Villagers
+            if (document.getElementById('solo-role-medium-toggle').checked) rolesDeck.push('medium');
+
+            // Add Villagers for remaining slots
             while (rolesDeck.length < total) {
                 rolesDeck.push('villager');
             }
@@ -5864,15 +5923,17 @@
             const total = players.length;
             const rolesDeck = [];
 
-            // Load custom deck selections
+            // Load custom deck selections from UI
             for (let i = 0; i < deckConfig.mafia; i++) rolesDeck.push('mafia');
-            if (deckConfig.doctor) rolesDeck.push('doctor');
-            if (deckConfig.detective) rolesDeck.push('detective');
-            if (deckConfig.framer) rolesDeck.push('framer');
-            if (deckConfig.bard) rolesDeck.push('bard');
-            if (deckConfig.vigilante) rolesDeck.push('vigilante');
-            if (deckConfig.scout) rolesDeck.push('scout');
-            if (deckConfig.jester) rolesDeck.push('jester');
+            if (document.getElementById('multi-role-doctor-toggle').checked) rolesDeck.push('doctor');
+            if (document.getElementById('multi-role-detective-toggle').checked) rolesDeck.push('detective');
+            if (document.getElementById('multi-role-framer-toggle').checked) rolesDeck.push('framer');
+            if (document.getElementById('multi-role-bard-toggle').checked) rolesDeck.push('bard');
+            if (document.getElementById('multi-role-vigilante-toggle').checked) rolesDeck.push('vigilante');
+            if (document.getElementById('multi-role-scout-toggle').checked) rolesDeck.push('scout');
+            if (document.getElementById('multi-role-jester-toggle').checked) rolesDeck.push('jester');
+            if (document.getElementById('multi-role-medium-toggle').checked) rolesDeck.push('medium');
+
             while (rolesDeck.length < total) {
                 rolesDeck.push('villager');
             }
@@ -6007,10 +6068,12 @@
             const me = players.find(p => p.id === myId);
 
             if (!me.alive) {
-                prompt.innerText = "YOU ARE DECEASED. Sleeping permanently...";
+                prompt.innerText = "YOU ARE DECEASED. But the Medium can hear you if you speak...";
                 prompt.classList.remove('hidden');
                 return;
             }
+
+            const aliveMafia = players.some(p => p.role === 'mafia' && p.alive);
 
             if (myRole === 'mafia') {
                 prompt.innerText = "CHOOSE A PLAYER TO ASSASSINATE.";
@@ -6022,10 +6085,18 @@
                 prompt.innerText = "CHOOSE A PLAYER TO INVESTIGATE.";
                 prompt.classList.remove('hidden');
             } else if (myRole === 'framer') {
-                prompt.innerText = "CHOOSE A PLAYER TO FRAME.";
+                if (!aliveMafia) {
+                    prompt.innerText = "MAFIA IS DEAD! CHOOSE A PLAYER TO ASSASSINATE.";
+                } else {
+                    prompt.innerText = "CHOOSE A PLAYER TO FRAME.";
+                }
                 prompt.classList.remove('hidden');
             } else if (myRole === 'bard') {
-                prompt.innerText = "CHOOSE A PLAYER TO ROLEBLOCK.";
+                if (!aliveMafia) {
+                    prompt.innerText = "MAFIA IS DEAD! CHOOSE A PLAYER TO ASSASSINATE.";
+                } else {
+                    prompt.innerText = "CHOOSE A PLAYER TO ROLEBLOCK.";
+                }
                 prompt.classList.remove('hidden');
             } else if (myRole === 'vigilante') {
                 if (roundsCount === 1) {
@@ -6039,6 +6110,9 @@
                 prompt.classList.remove('hidden');
             } else if (myRole === 'jester') {
                 prompt.innerText = "JESTER: Sleep peacefully. Plan your daytime exile.";
+                prompt.classList.remove('hidden');
+            } else if (myRole === 'medium') {
+                prompt.innerText = "MEDIUM: You may speak with the spirits of the dead in chat and voice.";
                 prompt.classList.remove('hidden');
             } else {
                 prompt.innerText = "VILLAGER: Go to sleep. There is nothing you can do tonight.";
@@ -6132,7 +6206,7 @@
                 const isMyMafiaTeammate = pRoleInfo && myRoleInfo && pRoleInfo.team === 'mafia' && myRoleInfo.team === 'mafia';
 
                 let isSelectable = p.alive && localPlayer.alive && (
-                    (gameState === 'night' && myRole !== 'villager' && myRole !== 'jester' && !isMyMafiaTeammate) ||
+                    (gameState === 'night' && myRole !== 'villager' && myRole !== 'jester' && myRole !== 'medium' && !isMyMafiaTeammate) ||
                     (gameState === 'day_vote') ||
                     (gameState === 'day_trial_vote')
                 );
@@ -6248,6 +6322,19 @@
             if (!me.alive) return;
             if (gameState === 'day_trial_vote' && myId === defendingPlayerId) {
                 alert("You are on trial! You cannot vote on this round.");
+                return;
+            }
+            if (gameState === 'night' && myRole === 'vigilante' && roundsCount === 1) {
+                alert("Vigilantes cannot shoot on Night 1!");
+                return;
+            }
+
+            // Prevent Mafia team from targeting each other at night
+            const targetP = players.find(x => x.id === targetId);
+            const tRoleInfo = targetP && targetP.role ? ROLES_INFO[targetP.role] : null;
+            const mRoleInfo = myRole ? ROLES_INFO[myRole] : null;
+            if (gameState === 'night' && tRoleInfo && mRoleInfo && tRoleInfo.team === 'mafia' && mRoleInfo.team === 'mafia') {
+                alert("You cannot target a member of your own syndicate!");
                 return;
             }
 
@@ -6377,19 +6464,32 @@
             const nightLogsKill = [];
             const originalNightActions = { ...nightActions };
 
-            // 1. Resolve Bard Roleblocks first
-            const bardPlayer = players.find(p => p.role === 'bard' && p.alive);
-            const blockedPlayerId = (bardPlayer && nightActions.bard) ? nightActions.bard : null;
+            // Check if standard Mafia is alive to determine hitman inheritance
+            const aliveMafia = players.some(p => p.role === 'mafia' && p.alive);
 
-            if (bardPlayer && originalNightActions.bard) {
-                const blockedPlayer = players.find(p => p.id === originalNightActions.bard);
-                if (blockedPlayer) {
-                    nightLogsNonKill.push({
-                        displayLog: "Bard blocked a player.",
-                        actor: "bard",
-                        targetPlayerName: blockedPlayer.name,
-                        actionType: "block"
-                    });
+            // 1. Resolve Bard Roleblocks first & Factional Kill Conversion
+            const bardPlayer = players.find(p => p.role === 'bard' && p.alive);
+            let blockedPlayerId = null;
+
+            if (bardPlayer && nightActions.bard) {
+                if (!aliveMafia) {
+                    // Mafia is dead. Bard inherits the kill instead of blocking!
+                    nightActions.mafia = nightActions.bard;
+                    originalNightActions.mafia = originalNightActions.bard;
+
+                    delete nightActions.bard;
+                    delete originalNightActions.bard;
+                } else {
+                    blockedPlayerId = nightActions.bard;
+                    const blockedPlayer = players.find(p => p.id === blockedPlayerId);
+                    if (blockedPlayer) {
+                        nightLogsNonKill.push({
+                            displayLog: "Bard blocked a player.",
+                            actor: "bard",
+                            targetPlayerName: blockedPlayer.name,
+                            actionType: "block"
+                        });
+                    }
                 }
             }
 
@@ -6406,17 +6506,27 @@
                 }
             }
 
-            // 2. Framer action
+            // 2. Framer action & Factional Kill Conversion
             const framerPlayer = players.find(p => p.role === 'framer' && p.alive);
+
             if (framerPlayer && nightActions.framer) {
-                const framedTarget = players.find(p => p.id === nightActions.framer);
-                if (framedTarget) {
-                    nightLogsNonKill.push({
-                        displayLog: "Framer framed a player.",
-                        actor: "framer",
-                        targetPlayerName: framedTarget.name,
-                        actionType: "frame"
-                    });
+                if (!aliveMafia) {
+                    // Mafia is dead. Framer action converts into the Factional Kill!
+                    nightActions.mafia = nightActions.framer;
+                    originalNightActions.mafia = originalNightActions.framer;
+
+                    delete nightActions.framer;
+                    delete originalNightActions.framer;
+                } else {
+                    const framedTarget = players.find(p => p.id === nightActions.framer);
+                    if (framedTarget) {
+                        nightLogsNonKill.push({
+                            displayLog: "Framer framed a player.",
+                            actor: "framer",
+                            targetPlayerName: framedTarget.name,
+                            actionType: "frame"
+                        });
+                    }
                 }
             }
 
@@ -8336,11 +8446,29 @@
 
             const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const isMafia = (channel === 'mafia');
-            const channelTag = isMafia ? '<span style="color:#ff8080;font-size:0.72rem;font-weight:700;letter-spacing:0.04em;margin-right:4px;">[MAFIA]</span>' : '';
-            const senderColor = isSelf ? 'var(--accent-gold)' : (isMafia ? '#ff9999' : '#a0cfff');
+            const isDead = (channel === 'dead');
+
+            let channelTag = '';
+            let senderColor = '#a0cfff';
+            let icon = '💬';
+
+            if (isMafia) {
+                channelTag = '<span style="color:#ff8080;font-size:0.72rem;font-weight:700;letter-spacing:0.04em;margin-right:4px;">[MAFIA]</span>';
+                senderColor = '#ff9999';
+                icon = '🔴';
+            } else if (isDead) {
+                channelTag = '<span style="color:#a82020;font-size:0.72rem;font-weight:700;letter-spacing:0.04em;margin-right:4px;">[SPIRITS]</span>';
+                senderColor = '#c8c8dc';
+                icon = '👻';
+            }
+
+            if (isSelf) {
+                senderColor = 'var(--accent-gold)';
+                if (!isMafia && !isDead) icon = '🟡';
+            }
 
             entry.innerHTML = `
-                <span class="log-icon">${isMafia ? '🔴' : (isSelf ? '🟡' : '💬')}</span>
+                <span class="log-icon">${icon}</span>
                 <span class="log-body">${channelTag}<span style="font-weight:700;color:${senderColor};">${escapeHTML(senderName)}:</span> ${escapeHTML(text)}</span>
                 <span class="log-time">${time}</span>
             `;
@@ -8354,18 +8482,27 @@
             if (!msg) return;
 
             const me = players.find(p => p.id === myId);
-            if (me && !me.alive) {
-                alert("You are eliminated and cannot speak in chat!");
+
+            // Allow dead players to speak ONLY at night
+            if (me && !me.alive && gameState !== 'night') {
+                alert("You are eliminated and cannot speak during the day!");
                 input.value = "";
                 return;
             }
 
             audioSynth.playClick();
 
-            // Check target channel (e.g. mafia night channel)
             let channel = 'all';
-            if (gameState === 'night' && myRole === 'mafia') {
-                channel = 'mafia';
+            if (gameState === 'night') {
+                if (myRole === 'mafia' && me.alive) {
+                    channel = 'mafia';
+                } else if (myRole === 'medium' || !me.alive) {
+                    channel = 'dead';
+                } else {
+                    alert("You are sleeping and cannot speak at night!");
+                    input.value = "";
+                    return;
+                }
             }
 
             // Log locally
@@ -8390,11 +8527,12 @@
         }
 
         // Host ONLY: broadcast game chat
+        // Host ONLY: broadcast game chat
         function broadcastGameChatPacket(senderId, msg, channel) {
             const sender = players.find(p => p.id === senderId);
             if (!sender) return;
 
-            // Broadcast selectively if mafia channel
+            // Broadcast selectively based on channel
             for (let cId in peerConns) {
                 if (cId === senderId) continue; // Avoid sending back to sender
                 const conn = peerConns[cId];
@@ -8405,22 +8543,22 @@
                     if (recipient && recipient.role === 'mafia' && conn.open) {
                         conn.send({
                             type: 'GAME_CHAT_MSG',
-                            data: {
-                                senderName: sender.name,
-                                message: msg,
-                                channel: 'mafia'
-                            }
+                            data: { senderName: sender.name, message: msg, channel: 'mafia' }
+                        });
+                    }
+                } else if (channel === 'dead') {
+                    // Send only to Medium or Dead players
+                    if (recipient && (!recipient.alive || recipient.role === 'medium') && conn.open) {
+                        conn.send({
+                            type: 'GAME_CHAT_MSG',
+                            data: { senderName: sender.name, message: msg, channel: 'dead' }
                         });
                     }
                 } else if (conn.open) {
                     // Send to all
                     conn.send({
                         type: 'GAME_CHAT_MSG',
-                        data: {
-                            senderName: sender.name,
-                            message: msg,
-                            channel: 'all'
-                        }
+                        data: { senderName: sender.name, message: msg, channel: 'all' }
                     });
                 }
             }
@@ -8428,10 +8566,26 @@
 
         function processGameChatPacket(senderId, msg, channel) {
             const sender = players.find(p => p.id === senderId);
-            if (!sender || !sender.alive) return;
+            if (!sender) return;
 
-            // Log on Host
-            addGameChatLog(sender.name, msg, channel, false);
+            // Allow alive players to speak normally. Dead players can ONLY speak in the 'dead' channel.
+            if (!sender.alive && channel !== 'dead') return;
+
+            // Log on Host UI ONLY if the Host is supposed to see it
+            const me = players.find(p => p.id === myId);
+            let hostCanSee = false;
+            
+            if (channel === 'all') {
+                hostCanSee = true;
+            } else if (channel === 'mafia' && me && me.role === 'mafia') {
+                hostCanSee = true;
+            } else if (channel === 'dead' && me && (!me.alive || me.role === 'medium')) {
+                hostCanSee = true;
+            }
+
+            if (hostCanSee) {
+                addGameChatLog(sender.name, msg, channel, false);
+            }
 
             // Relay to clients
             broadcastGameChatPacket(senderId, msg, channel);
@@ -8682,10 +8836,18 @@
             actionContainer.innerHTML = "";
 
             const localPlayer = players.find(x => x.id === myId);
-            const isSelectable = p.alive && localPlayer.alive && (
-                (gameState === 'night' && myRole !== 'villager' && !(myRole === 'mafia' && p.role === 'mafia')) ||
-                (gameState === 'day_vote')
+
+            // This now checks if they are on the same mafia team (Bard, Framer, Mafia)
+            let isSelectable = p.alive && localPlayer.alive && (
+                (gameState === 'night' && myRole !== 'villager' && myRole !== 'jester' && myRole !== 'medium' && !isMyMafiaTeammate) ||
+                (gameState === 'day_vote') ||
+                (gameState === 'day_trial_vote')
             );
+
+            // Prevent Vigilante from seeing the action button on Night 1
+            if (gameState === 'night' && myRole === 'vigilante' && roundsCount === 1) {
+                isSelectable = false;
+            }
 
             if (isSelectable) {
                 const actionBtn = document.createElement('button');
@@ -8697,6 +8859,8 @@
 
                 // Button label
                 let btnLabel = "Select Target";
+                const aliveMafia = players.some(x => x.role === 'mafia' && x.alive);
+
                 if (gameState === 'day_vote') {
                     btnLabel = isSelected ? "Cancel Vote" : "Vote to Banish";
                 } else if (gameState === 'night') {
@@ -8706,6 +8870,22 @@
                         btnLabel = isSelected ? "Cancel Protection" : "Protect Target";
                     } else if (myRole === 'detective') {
                         btnLabel = isSelected ? "Cancel Investigation" : "Investigate Target";
+                    } else if (myRole === 'framer') {
+                        if (!aliveMafia) {
+                            btnLabel = isSelected ? "Cancel Assassination" : "Assassinate Target";
+                        } else {
+                            btnLabel = isSelected ? "Cancel Framing" : "Frame Target";
+                        }
+                    } else if (myRole === 'bard') {
+                        if (!aliveMafia) {
+                            btnLabel = isSelected ? "Cancel Assassination" : "Assassinate Target";
+                        } else {
+                            btnLabel = isSelected ? "Cancel Roleblock" : "Roleblock Target";
+                        }
+                    } else if (myRole === 'vigilante') {
+                        btnLabel = isSelected ? "Cancel Shot" : "Shoot Target";
+                    } else if (myRole === 'scout') {
+                        btnLabel = isSelected ? "Cancel Tracking" : "Track Target";
                     }
                 }
                 actionBtn.innerText = btnLabel;
@@ -9015,8 +9195,27 @@
             if (!isMultiplayer) return;
             const me = players.find(p => p.id === myId);
             const isNight = (gameState === 'night');
-            // Mute locally if we are dead, or if we clicked the manual mute button, or if it is night time
-            const shouldLocalMute = !me || !me.alive || isMuted || isNight;
+
+            // Determine if the local microphone should be muted
+            let shouldLocalMute = true;
+
+            if (isMuted) {
+                shouldLocalMute = true; // Manually muted
+            } else if (isNight) {
+                // At night: Only Medium and Dead players can speak
+                if (me && (!me.alive || me.role === 'medium')) {
+                    shouldLocalMute = false;
+                } else {
+                    shouldLocalMute = true; // Everyone else is sleeping
+                }
+            } else {
+                // During Day: Dead players are muted, alive players can speak
+                if (me && !me.alive) {
+                    shouldLocalMute = true;
+                } else {
+                    shouldLocalMute = false;
+                }
+            }
 
             if (localAudioStream) {
                 localAudioStream.getAudioTracks().forEach(track => {
@@ -9033,11 +9232,22 @@
 
         function updateRemoteVoiceMuting() {
             if (!isMultiplayer) return;
+            const me = players.find(x => x.id === myId);
+            const isNight = (gameState === 'night');
+
             players.forEach(p => {
                 const audioEl = document.getElementById(`audio-remote-${p.id}`);
                 if (audioEl) {
-                    // Mute remote audio if the player is dead
-                    audioEl.muted = !p.alive;
+                    if (isNight) {
+                        // At night: Medium and Dead players can hear each other.
+                        const remoteCanSpeak = (!p.alive || p.role === 'medium');
+                        const iCanHear = (me && (!me.alive || me.role === 'medium'));
+
+                        audioEl.muted = !(remoteCanSpeak && iCanHear);
+                    } else {
+                        // During day: Everyone hears alive players. Dead players are muted.
+                        audioEl.muted = !p.alive;
+                    }
                 }
             });
         }
