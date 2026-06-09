@@ -2682,16 +2682,22 @@
             <div style="display: flex; gap: 10px; align-items: flex-start;">
                 <span style="font-size: 1.4rem; line-height: 1; flex-shrink: 0;">🔌</span>
                 <div style="flex: 1;">
-                    <h4 style="color: #ff4d4d; font-weight: bold; margin-bottom: 6px; font-size: 0.95rem;">Signaling Broker Unreachable</h4>
+                    <h4 style="color: #ff4d4d; font-weight: bold; margin-bottom: 6px; font-size: 0.95rem;">Signaling
+                        Broker Unreachable</h4>
                     <p style="font-size: 0.8rem; line-height: 1.5; color: var(--text-muted); margin-bottom: 10px;">
-                        The public PeerJS server (<code style="background: rgba(0,0,0,0.3); padding: 1px 4px; border-radius: 3px;">0.peerjs.com</code>) is not responding after 5 attempts.
+                        The public PeerJS server (<code
+                            style="background: rgba(0,0,0,0.3); padding: 1px 4px; border-radius: 3px;">0.peerjs.com</code>)
+                        is not responding after 5 attempts.
                         This can happen when the public server is down or overloaded.
-                        <strong style="color: var(--text-main);">The fastest fix is to deploy your own free server</strong> — see instructions below.
+                        <strong style="color: var(--text-main);">The fastest fix is to deploy your own free
+                            server</strong> — see instructions below.
                     </p>
 
                     <!-- Quick inline relay: enter custom server URL -->
                     <div style="background: rgba(0,0,0,0.25); border-radius: 8px; padding: 12px; margin-bottom: 10px;">
-                        <div style="font-size: 0.78rem; color: var(--accent-gold); font-weight: 600; margin-bottom: 8px;">⚡ Quick Connect — Enter Your Server URL:</div>
+                        <div
+                            style="font-size: 0.78rem; color: var(--accent-gold); font-weight: 600; margin-bottom: 8px;">
+                            ⚡ Quick Connect — Enter Your Server URL:</div>
                         <div style="display: flex; gap: 8px; align-items: center;">
                             <input type="text" id="quick-broker-url" class="text-input"
                                 placeholder="https://your-app.onrender.com"
@@ -2702,18 +2708,28 @@
                             </button>
                         </div>
                         <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 5px;">
-                            After deploying to Render.com, paste the <code style="background:rgba(0,0,0,0.3);padding:1px 3px;border-radius:3px;">https://...</code> URL above and click Retry.
+                            After deploying to Render.com, paste the <code
+                                style="background:rgba(0,0,0,0.3);padding:1px 3px;border-radius:3px;">https://...</code>
+                            URL above and click Retry.
                         </div>
                     </div>
 
                     <details style="font-size: 0.78rem; color: var(--text-muted);">
-                        <summary style="cursor: pointer; color: var(--accent-gold); font-weight: 600; margin-bottom: 6px; user-select: none;">📋 How to deploy a free server (2 min)</summary>
+                        <summary
+                            style="cursor: pointer; color: var(--accent-gold); font-weight: 600; margin-bottom: 6px; user-select: none;">
+                            📋 How to deploy a free server (2 min)</summary>
                         <ol style="margin: 8px 0 0 16px; line-height: 1.9; color: var(--text-main);">
                             <li>Go to <strong>render.com</strong> → Sign up free (GitHub login works)</li>
                             <li>Click <strong>New → Web Service → Public Git Repo</strong></li>
-                            <li>Enter repo: <code style="background:rgba(0,0,0,0.3);padding:1px 4px;border-radius:3px;">https://github.com/peers/peerjs-server</code></li>
-                            <li>Build command: <code style="background:rgba(0,0,0,0.3);padding:1px 4px;border-radius:3px;">npm install</code></li>
-                            <li>Start command: <code style="background:rgba(0,0,0,0.3);padding:1px 4px;border-radius:3px;">node src/index.js</code></li>
+                            <li>Enter repo: <code
+                                    style="background:rgba(0,0,0,0.3);padding:1px 4px;border-radius:3px;">https://github.com/peers/peerjs-server</code>
+                            </li>
+                            <li>Build command: <code
+                                    style="background:rgba(0,0,0,0.3);padding:1px 4px;border-radius:3px;">npm install</code>
+                            </li>
+                            <li>Start command: <code
+                                    style="background:rgba(0,0,0,0.3);padding:1px 4px;border-radius:3px;">node src/index.js</code>
+                            </li>
                             <li>Click <strong>Deploy</strong> — copy the <code>https://…onrender.com</code> URL</li>
                             <li>Paste it in the box above and click <strong>Retry</strong></li>
                         </ol>
@@ -3861,7 +3877,7 @@
 
                 peerRetryCount = 0;
                 if (peer) {
-                    try { peer.destroy(); } catch (e) {}
+                    try { peer.destroy(); } catch (e) { }
                     peer = null;
                 }
                 audioSynth.playClick();
