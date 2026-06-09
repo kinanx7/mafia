@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAFIA: Aracord studio</title>
+    <title>MAFIA: Aracord studios</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1016,13 +1016,13 @@
             display: grid;
             grid-template-columns: 1fr;
             gap: 20px;
-            height: 310px;
+            height: 410px;
         }
 
         @media (max-width: 768px) {
             .game-bottom-area {
                 grid-template-columns: 1fr;
-                height: 270px;
+                height: 350px;
             }
         }
 
@@ -2014,6 +2014,164 @@
             }
         }
 
+        /* Doctor Custom Shield Animations */
+        .shield-shatter-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        .shield-part {
+            font-size: 4.5rem;
+            position: absolute;
+            text-shadow: 0 0 15px rgba(207, 42, 42, 0.8);
+            pointer-events: none;
+        }
+
+        .shield-left {
+            clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);
+            animation: shieldShatterLeft 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        .shield-right {
+            clip-path: polygon(50% 0, 100% 0, 100% 100%, 50% 100%);
+            animation: shieldShatterRight 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        @keyframes shieldShatterLeft {
+            0% {
+                transform: translateX(0) rotate(0deg);
+                opacity: 1;
+            }
+
+            25% {
+                transform: translateX(-5px) rotate(-5deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateX(-40px) translateY(60px) rotate(-45deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes shieldShatterRight {
+            0% {
+                transform: translateX(0) rotate(0deg);
+                opacity: 1;
+            }
+
+            25% {
+                transform: translateX(5px) rotate(5deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateX(40px) translateY(60px) rotate(45deg);
+                opacity: 0;
+            }
+        }
+
+        .shield-shiny-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        .shield-shiny {
+            font-size: 4.5rem;
+            position: absolute;
+            text-shadow: 0 0 20px rgba(42, 207, 122, 0.9);
+            animation: shieldGlowPulse 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes shieldGlowPulse {
+            0% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 5px rgba(42, 207, 122, 0.6));
+            }
+
+            100% {
+                transform: scale(1.1);
+                filter: drop-shadow(0 0 25px rgba(42, 207, 122, 0.95)) brightness(1.2);
+            }
+        }
+
+        .shield-bullet {
+            position: absolute;
+            width: 20px;
+            height: 6px;
+            background: #ff4d4d;
+            border-radius: 3px;
+            box-shadow: 0 0 8px #ff4d4d;
+            z-index: 5;
+            left: -150px;
+            top: 50%;
+            animation: shieldBulletFly 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        @keyframes shieldBulletFly {
+            0% {
+                left: -150px;
+                opacity: 1;
+            }
+
+            70% {
+                left: 0px;
+                opacity: 1;
+                transform: scaleX(1);
+            }
+
+            100% {
+                left: 5px;
+                opacity: 0;
+                transform: scaleX(0.1) rotate(45deg);
+            }
+        }
+
+        .shield-impact-flash {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 0 20px #fff, 0 0 40px var(--accent-green);
+            opacity: 0;
+            z-index: 6;
+            animation: shieldImpact 0.6s ease-out 0.42s forwards;
+        }
+
+        @keyframes shieldImpact {
+            0% {
+                transform: scale(0.5);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(3.5);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(6);
+                opacity: 0;
+            }
+        }
+
         .card-crack-overlay {
             position: absolute;
             top: 0;
@@ -2165,7 +2323,7 @@
     <!-- ------------------ 1. MAIN MENU SCREEN ------------------ -->
     <div class="glass-panel" id="menu-screen">
         <h1 class="title-glow">MAFIA</h1>
-        <div class="subtitle">Aracord studio</div>
+        <div class="subtitle">Aracord studios</div>
 
         <div class="menu-grid">
             <div class="input-group">
@@ -2344,6 +2502,18 @@
                                 <button class="count-btn" onclick="adjustTimer('solo-timer-defend', 5)">+</button>
                             </div>
                         </div>
+
+                        <div
+                            style="display: flex; justify-content: space-between; margin-top: 12px; align-items: center; font-size: 0.95rem;">
+                            <span>Reveal Roles on Death</span>
+                            <div class="role-controls">
+                                <label class="role-switch">
+                                    <input type="checkbox" id="solo-reveal-roles-toggle" checked
+                                        onchange="deckConfig.revealRolesOnDeath = this.checked">
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2508,25 +2678,46 @@
 
         <!-- Network Connection Error Banner -->
         <div id="lobby-network-error-banner" class="hidden"
-            style="background: rgba(207, 42, 42, 0.15); border: 1px solid var(--accent-crimson); border-radius: 8px; padding: 15px; margin-bottom: 20px; text-align: left; animation: fadeIn 0.4s ease;">
-            <div style="display: flex; gap: 10px; align-items: start;">
-                <span style="font-size: 1.5rem; line-height: 1;">⚠️</span>
-                <div>
-                    <h4 style="color: #ff4d4d; font-weight: bold; margin-bottom: 5px; font-size: 0.95rem;">Matchmaking
-                        Broker Connection Failed</h4>
-                    <p style="font-size: 0.82rem; line-height: 1.4; color: var(--text-main); margin-bottom: 8px;">
-                        The game cannot establish a multiplayer signaling connection. This is usually because an
-                        adblocker (like <strong>uBlock Origin</strong>) or browser security shield (like <strong>Brave
-                            Shields</strong>) is blocking the public PeerJS matchmaking server (<code
-                            style="background: rgba(0,0,0,0.3); padding: 2px 4px; border-radius: 4px;">0.peerjs.com</code>).
+            style="background: rgba(207, 42, 42, 0.12); border: 1px solid var(--accent-crimson); border-radius: 10px; padding: 16px; margin-bottom: 20px; text-align: left; animation: fadeIn 0.4s ease;">
+            <div style="display: flex; gap: 10px; align-items: flex-start;">
+                <span style="font-size: 1.4rem; line-height: 1; flex-shrink: 0;">🔌</span>
+                <div style="flex: 1;">
+                    <h4 style="color: #ff4d4d; font-weight: bold; margin-bottom: 6px; font-size: 0.95rem;">Signaling Broker Unreachable</h4>
+                    <p style="font-size: 0.8rem; line-height: 1.5; color: var(--text-muted); margin-bottom: 10px;">
+                        The public PeerJS server (<code style="background: rgba(0,0,0,0.3); padding: 1px 4px; border-radius: 3px;">0.peerjs.com</code>) is not responding after 5 attempts.
+                        This can happen when the public server is down or overloaded.
+                        <strong style="color: var(--text-main);">The fastest fix is to deploy your own free server</strong> — see instructions below.
                     </p>
-                    <div style="font-size: 0.8rem; color: var(--accent-gold); font-weight: 500;">
-                        To play with friends:
-                        <ul style="margin-left: 15px; margin-top: 4px; list-style-type: disc;">
-                            <li>Disable your adblocker/Shield for this site.</li>
-                            <li>Reload the page and try hosting/joining again.</li>
-                        </ul>
+
+                    <!-- Quick inline relay: enter custom server URL -->
+                    <div style="background: rgba(0,0,0,0.25); border-radius: 8px; padding: 12px; margin-bottom: 10px;">
+                        <div style="font-size: 0.78rem; color: var(--accent-gold); font-weight: 600; margin-bottom: 8px;">⚡ Quick Connect — Enter Your Server URL:</div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <input type="text" id="quick-broker-url" class="text-input"
+                                placeholder="https://your-app.onrender.com"
+                                style="flex: 1; padding: 7px 10px; font-size: 0.82rem; height: auto; background: rgba(0,0,0,0.4);">
+                            <button class="btn btn-gold" onclick="applyQuickBrokerUrl()"
+                                style="padding: 7px 14px; font-size: 0.78rem; height: auto; white-space: nowrap; flex-shrink: 0;">
+                                Retry ↗
+                            </button>
+                        </div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 5px;">
+                            After deploying to Render.com, paste the <code style="background:rgba(0,0,0,0.3);padding:1px 3px;border-radius:3px;">https://...</code> URL above and click Retry.
+                        </div>
                     </div>
+
+                    <details style="font-size: 0.78rem; color: var(--text-muted);">
+                        <summary style="cursor: pointer; color: var(--accent-gold); font-weight: 600; margin-bottom: 6px; user-select: none;">📋 How to deploy a free server (2 min)</summary>
+                        <ol style="margin: 8px 0 0 16px; line-height: 1.9; color: var(--text-main);">
+                            <li>Go to <strong>render.com</strong> → Sign up free (GitHub login works)</li>
+                            <li>Click <strong>New → Web Service → Public Git Repo</strong></li>
+                            <li>Enter repo: <code style="background:rgba(0,0,0,0.3);padding:1px 4px;border-radius:3px;">https://github.com/peers/peerjs-server</code></li>
+                            <li>Build command: <code style="background:rgba(0,0,0,0.3);padding:1px 4px;border-radius:3px;">npm install</code></li>
+                            <li>Start command: <code style="background:rgba(0,0,0,0.3);padding:1px 4px;border-radius:3px;">node src/index.js</code></li>
+                            <li>Click <strong>Deploy</strong> — copy the <code>https://…onrender.com</code> URL</li>
+                            <li>Paste it in the box above and click <strong>Retry</strong></li>
+                        </ol>
+                    </details>
                 </div>
             </div>
         </div>
@@ -2603,6 +2794,19 @@
                             <span class="count-display" id="multi-timer-defend-display" style="width: 35px;">15</span>
                             <button class="count-btn host-only-control"
                                 onclick="adjustMultiTimer('defend', 5)">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Reveal Roles toggle -->
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; margin-bottom: 15px;">
+                        <span>Reveal Roles on Death</span>
+                        <div class="role-controls">
+                            <label class="role-switch">
+                                <input type="checkbox" id="multi-reveal-roles-toggle" class="host-only-control" checked
+                                    onchange="onMultiSettingChanged()">
+                                <span class="switch-slider"></span>
+                            </label>
                         </div>
                     </div>
 
@@ -2951,11 +3155,66 @@
                 </div>
             </div>
 
-            <div class="setting-row hidden" id="mic-selector-row" style="flex-direction: column; align-items: stretch; gap: 8px;">
+            <div class="setting-row hidden" id="mic-selector-row"
+                style="flex-direction: column; align-items: stretch; gap: 8px;">
                 <label style="align-self: flex-start;">Microphone Input Device</label>
-                <select id="mic-device-select" class="text-input" onchange="changeMicrophone(this.value)" style="width: 100%; background: rgba(0,0,0,0.4); color: #fff; font-size: 0.85rem; padding: 6px; border: 1px solid var(--glass-border); border-radius: 6px; cursor: pointer;">
+                <select id="mic-device-select" class="text-input" onchange="changeMicrophone(this.value)"
+                    style="width: 100%; background: rgba(0,0,0,0.4); color: #fff; font-size: 0.85rem; padding: 6px; border: 1px solid var(--glass-border); border-radius: 6px; cursor: pointer;">
                     <option value="">Default Microphone</option>
                 </select>
+            </div>
+
+            <!-- Multiplayer Connection Settings -->
+            <div id="multiplayer-connection-settings" class="hidden"
+                style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 15px; margin-top: 15px; margin-bottom: 15px;">
+                <h3 class="heading-serif"
+                    style="font-size: 1rem; color: var(--accent-gold); margin-bottom: 10px; text-align: left;">Signaling
+                    Broker Settings</h3>
+
+                <div class="setting-row"
+                    style="flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 12px;">
+                    <div style="display: flex; gap: 8px;">
+                        <div style="flex: 2; display: flex; flex-direction: column; gap: 4px;">
+                            <label style="font-size: 0.75rem; color: var(--text-muted); text-align: left;">Broker
+                                Host</label>
+                            <input type="text" id="peerjs-host" class="text-input" placeholder="0.peerjs.com"
+                                style="width: 100%; padding: 6px 10px; font-size: 0.85rem; height: auto;">
+                        </div>
+                        <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                            <label style="font-size: 0.75rem; color: var(--text-muted); text-align: left;">Port</label>
+                            <input type="number" id="peerjs-port" class="text-input" placeholder="443"
+                                style="width: 100%; padding: 6px 10px; font-size: 0.85rem; height: auto;">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                            <label style="font-size: 0.75rem; color: var(--text-muted); text-align: left;">Path</label>
+                            <input type="text" id="peerjs-path" class="text-input" placeholder="/"
+                                style="width: 100%; padding: 6px 10px; font-size: 0.85rem; height: auto;">
+                        </div>
+                        <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                            <label style="font-size: 0.75rem; color: var(--text-muted); text-align: left;">Key</label>
+                            <input type="text" id="peerjs-key" class="text-input" placeholder="peerjs"
+                                style="width: 100%; padding: 6px 10px; font-size: 0.85rem; height: auto;">
+                        </div>
+                    </div>
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 0.85rem;">
+                        <span style="color: var(--text-main);">Secure Connection (SSL)</span>
+                        <label class="role-switch">
+                            <input type="checkbox" id="peerjs-secure" checked>
+                            <span class="switch-slider"></span>
+                        </label>
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 12px;">
+                        <button class="btn btn-gold" onclick="saveSignalingSettings()"
+                            style="flex: 1; font-size: 0.75rem; padding: 6px 12px; height: auto;">Save &
+                            Reconnect</button>
+                        <button class="btn" onclick="resetSignalingSettings()"
+                            style="flex: 1; font-size: 0.75rem; padding: 6px 12px; height: auto; background: rgba(255,255,255,0.05);">Reset
+                            Default</button>
+                    </div>
+                </div>
             </div>
 
             <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.4;">
@@ -3456,7 +3715,7 @@
             const modal = document.getElementById('settings-modal');
             if (show) {
                 modal.classList.remove('hidden');
-                
+
                 // Show microphone settings in multiplayer only
                 const micRow = document.getElementById('mic-selector-row');
                 if (micRow) {
@@ -3467,8 +3726,148 @@
                         micRow.classList.add('hidden');
                     }
                 }
+
+                // Show multiplayer connection settings in multiplayer only
+                const connSettings = document.getElementById('multiplayer-connection-settings');
+                if (connSettings) {
+                    if (isMultiplayer) {
+                        connSettings.classList.remove('hidden');
+                        loadSignalingSettings();
+                    } else {
+                        connSettings.classList.add('hidden');
+                    }
+                }
             } else {
                 modal.classList.add('hidden');
+            }
+        }
+
+        function loadSignalingSettings() {
+            document.getElementById('peerjs-host').value = localStorage.getItem('peerjs-host') || '0.peerjs.com';
+            document.getElementById('peerjs-port').value = localStorage.getItem('peerjs-port') !== null ? localStorage.getItem('peerjs-port') : '443';
+            document.getElementById('peerjs-path').value = localStorage.getItem('peerjs-path') || '/';
+            document.getElementById('peerjs-key').value = localStorage.getItem('peerjs-key') || 'peerjs';
+            document.getElementById('peerjs-secure').checked = localStorage.getItem('peerjs-secure') !== null ? localStorage.getItem('peerjs-secure') === 'true' : true;
+        }
+
+        function saveSignalingSettings() {
+            audioSynth.playClick();
+            const host = document.getElementById('peerjs-host').value.trim();
+            const port = document.getElementById('peerjs-port').value.trim();
+            const path = document.getElementById('peerjs-path').value.trim();
+            const key = document.getElementById('peerjs-key').value.trim();
+            const secure = document.getElementById('peerjs-secure').checked;
+
+            // Determine if these are non-default custom values
+            const isCustomHost = host && host !== '0.peerjs.com';
+            const isCustomPort = port && port !== '443';
+            const isCustomPath = path && path !== '/';
+            const isCustomKey = key && key !== 'peerjs';
+
+            // Only persist truly custom values; clear defaults so we use native cloud routing
+            if (isCustomHost) { localStorage.setItem('peerjs-host', host); } else { localStorage.removeItem('peerjs-host'); }
+            if (isCustomPort) { localStorage.setItem('peerjs-port', port); } else { localStorage.removeItem('peerjs-port'); }
+            if (isCustomPath) { localStorage.setItem('peerjs-path', path); } else { localStorage.removeItem('peerjs-path'); }
+            if (isCustomKey) { localStorage.setItem('peerjs-key', key); } else { localStorage.removeItem('peerjs-key'); }
+            // Secure is always saved as it is a valid override even on default host
+            localStorage.setItem('peerjs-secure', secure ? 'true' : 'false');
+
+            console.log("Saved signaling settings (custom host:", isCustomHost, "):", { host, port, path, key, secure });
+
+            // If we are currently in the lobby screen, reconnect using new credentials
+            const lobbyScreen = document.getElementById('multiplayer-lobby-screen');
+            if (lobbyScreen && !lobbyScreen.classList.contains('hidden')) {
+                const chatBox = document.getElementById('lobby-chat-box');
+                if (chatBox) {
+                    chatBox.innerHTML += `<div style="color: var(--accent-gold); font-style: italic;">Saved settings. Reconnecting to signaling broker...</div>`;
+                }
+                peerRetryCount = 0; // Reset retries
+                if (peer) {
+                    try { peer.destroy(); } catch (e) { }
+                    peer = null;
+                }
+                initializePeer(isHost);
+            }
+
+            // Hide the error banner when user attempts to reconnect
+            const errBanner = document.getElementById('lobby-network-error-banner');
+            if (errBanner) errBanner.classList.add('hidden');
+        }
+
+        function resetSignalingSettings() {
+            audioSynth.playClick();
+            document.getElementById('peerjs-host').value = '0.peerjs.com';
+            document.getElementById('peerjs-port').value = '443';
+            document.getElementById('peerjs-path').value = '/';
+            document.getElementById('peerjs-key').value = 'peerjs';
+            document.getElementById('peerjs-secure').checked = true;
+
+            // Clear ALL saved values so initializePeer uses true default cloud routing
+            localStorage.removeItem('peerjs-host');
+            localStorage.removeItem('peerjs-port');
+            localStorage.removeItem('peerjs-path');
+            localStorage.removeItem('peerjs-key');
+            localStorage.removeItem('peerjs-secure');
+
+            console.log("Reset signaling settings to default (cloud routing).");
+
+            // Trigger reconnect directly without writing defaults to localStorage
+            const lobbyScreen = document.getElementById('multiplayer-lobby-screen');
+            if (lobbyScreen && !lobbyScreen.classList.contains('hidden')) {
+                const chatBox = document.getElementById('lobby-chat-box');
+                if (chatBox) {
+                    chatBox.innerHTML += `<div style="color: var(--accent-gold); font-style: italic;">Reset to default. Reconnecting to signaling broker...</div>`;
+                }
+                peerRetryCount = 0;
+                if (peer) {
+                    try { peer.destroy(); } catch (e) { }
+                    peer = null;
+                }
+                initializePeer(isHost);
+            }
+
+            const errBanner = document.getElementById('lobby-network-error-banner');
+            if (errBanner) errBanner.classList.add('hidden');
+        }
+
+        function applyQuickBrokerUrl() {
+            const rawUrl = (document.getElementById('quick-broker-url').value || '').trim();
+            if (!rawUrl) {
+                alert('Please enter your server URL (e.g. https://your-app.onrender.com)');
+                return;
+            }
+            try {
+                const url = new URL(rawUrl);
+                const host = url.hostname;
+                const port = url.port ? parseInt(url.port) : (url.protocol === 'https:' ? 443 : 80);
+                const secure = url.protocol === 'https:';
+                // Path is the URL pathname, default to '/' but use '/peerjs' if detected
+                const path = url.pathname && url.pathname !== '/' ? url.pathname : '/';
+
+                // Save as custom settings
+                localStorage.setItem('peerjs-host', host);
+                localStorage.setItem('peerjs-port', String(port));
+                localStorage.setItem('peerjs-path', path);
+                localStorage.setItem('peerjs-secure', secure ? 'true' : 'false');
+                localStorage.removeItem('peerjs-key'); // Use default key
+
+                const chatBox = document.getElementById('lobby-chat-box');
+                if (chatBox) {
+                    chatBox.innerHTML += `<div style="color: var(--accent-gold); font-style: italic;">Connecting to custom broker: ${host}:${port}${path}...</div>`;
+                }
+
+                const errBanner = document.getElementById('lobby-network-error-banner');
+                if (errBanner) errBanner.classList.add('hidden');
+
+                peerRetryCount = 0;
+                if (peer) {
+                    try { peer.destroy(); } catch (e) {}
+                    peer = null;
+                }
+                audioSynth.playClick();
+                initializePeer(isHost);
+            } catch (e) {
+                alert('Invalid URL. Please enter a full URL starting with https:// (e.g. https://your-app.onrender.com)');
             }
         }
 
@@ -3583,6 +3982,15 @@
         let localAudioStream = null;
         let activeCalls = {};
         let isMuted = false;
+
+        // Startup cleanup: remove stale default peerjs settings stored by older code versions
+        // so initializePeer() uses true default cloud routing instead of explicit host overrides
+        (function cleanupStalePeerjsDefaults() {
+            if (localStorage.getItem('peerjs-host') === '0.peerjs.com') localStorage.removeItem('peerjs-host');
+            if (localStorage.getItem('peerjs-port') === '443') localStorage.removeItem('peerjs-port');
+            if (localStorage.getItem('peerjs-path') === '/') localStorage.removeItem('peerjs-path');
+            if (localStorage.getItem('peerjs-key') === 'peerjs') localStorage.removeItem('peerjs-key');
+        })();
         let deckConfig = {
             mafia: 1,
             doctor: true,
@@ -3591,7 +3999,8 @@
             bard: true,
             vigilante: true,
             scout: true,
-            jester: true
+            jester: true,
+            revealRolesOnDeath: true
         };
         let timerConfig = {
             discuss: 30,
@@ -3641,7 +4050,7 @@
             }
         }
 
-        function multiplayerHostRoom() {
+        async function multiplayerHostRoom() {
             audioSynth.playClick();
             isHost = true;
             roomCode = generateRandomRoomCode();
@@ -3659,6 +4068,7 @@
             document.getElementById('multi-role-vigilante-toggle').disabled = false;
             document.getElementById('multi-role-scout-toggle').disabled = false;
             document.getElementById('multi-role-jester-toggle').disabled = false;
+            document.getElementById('multi-reveal-roles-toggle').disabled = false;
             document.getElementById('settings-lock-title').innerText = "Room Settings";
 
             document.getElementById('btn-start-multiplayer').innerText = "Start Game";
@@ -3666,9 +4076,10 @@
 
             // Set up lobby list & chat
             document.getElementById('lobby-players-ul').innerHTML = "";
-            document.getElementById('lobby-chat-box').innerHTML = `<div style="color: var(--text-muted); font-style: italic;">Connecting to matchmaking broker...</div>`;
+            document.getElementById('lobby-chat-box').innerHTML = `<div style="color: var(--text-muted); font-style: italic;">Acquiring microphone stream...</div>`;
 
             transitionScreen('multiplayer-mode-screen', 'multiplayer-lobby-screen');
+            await acquireLocalStream();
             initializePeer(true);
         }
 
@@ -3682,7 +4093,7 @@
             joinRoomWithCode(codeInput);
         }
 
-        function joinRoomWithCode(code) {
+        async function joinRoomWithCode(code) {
             isHost = false;
             roomCode = code;
 
@@ -3699,6 +4110,7 @@
             document.getElementById('multi-role-vigilante-toggle').disabled = true;
             document.getElementById('multi-role-scout-toggle').disabled = true;
             document.getElementById('multi-role-jester-toggle').disabled = true;
+            document.getElementById('multi-reveal-roles-toggle').disabled = true;
             document.getElementById('settings-lock-title').innerText = "Room Settings (Locked)";
 
             document.getElementById('btn-start-multiplayer').innerText = "Waiting for Host...";
@@ -3706,7 +4118,7 @@
 
             // Set up lobby list & chat
             document.getElementById('lobby-players-ul').innerHTML = "";
-            document.getElementById('lobby-chat-box').innerHTML = `<div style="color: var(--text-muted); font-style: italic;">Connecting to matchmaking broker...</div>`;
+            document.getElementById('lobby-chat-box').innerHTML = `<div style="color: var(--text-muted); font-style: italic;">Acquiring microphone stream...</div>`;
 
             // If we came from the mode screen, transition from it. Otherwise transition from menu.
             const modeScreen = document.getElementById('multiplayer-mode-screen');
@@ -3716,6 +4128,7 @@
                 transitionScreen('menu-screen', 'multiplayer-lobby-screen');
             }
 
+            await acquireLocalStream();
             initializePeer(false);
         }
 
@@ -3732,6 +4145,9 @@
             const vigilanteEnabled = document.getElementById('solo-role-vigilante-toggle').checked;
             const scoutEnabled = document.getElementById('solo-role-scout-toggle').checked;
             const jesterEnabled = document.getElementById('solo-role-jester-toggle').checked;
+            const revealRolesOnDeath = document.getElementById('solo-reveal-roles-toggle').checked;
+
+            deckConfig.revealRolesOnDeath = revealRolesOnDeath;
 
             let specialCount = mafiaCount +
                 (docEnabled ? 1 : 0) +
@@ -3856,38 +4272,134 @@
             return result;
         }
 
+        let peerRetryCount = 0;
+        const MAX_PEER_RETRIES = 5;
+        let peerRetryTimeout = null;
+
+        async function acquireLocalStream() {
+            if (localAudioStream) return;
+            try {
+                // NEW: Safely exit if the browser blocks mic access (e.g., non-HTTPS)
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    console.warn("Microphone API blocked (requires HTTPS). Voice chat disabled.");
+                    return;
+                }
+                localAudioStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                console.log("Local microphone stream acquired.");
+                isMuted = false;
+            } catch (err) {
+                console.error("Microphone access denied or failed:", err);
+            }
+        }
+
+        function getLocalAudioStreamOrSilent() {
+            if (localAudioStream) return localAudioStream;
+            try {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    const ctx = new AudioContextClass();
+                    const oscillator = ctx.createOscillator();
+                    const dest = ctx.createMediaStreamDestination();
+                    oscillator.frequency.value = 0;
+                    oscillator.connect(dest);
+                    oscillator.start();
+                    console.log("Created silent audio fallback stream.");
+                    return dest.stream;
+                }
+            } catch (e) {
+                console.error("Failed to create silent audio track fallback:", e);
+            }
+            return new MediaStream();
+        }
+
         function initializePeer(hosting) {
+            if (peerRetryTimeout) {
+                clearTimeout(peerRetryTimeout);
+                peerRetryTimeout = null;
+            }
             myId = hosting ? 'host-' + roomCode : 'client-' + roomCode + '-' + Math.random().toString(36).substr(2, 6);
 
-            // Initialize PeerJS with explicit secure configuration and default cloud key
-            peer = new Peer(myId, {
-                host: '0.peerjs.com',
-                port: 443,
-                secure: true,
-                path: '/',
-                key: 'peerjs',
-                debug: 1,
-                config: {
-                    iceServers: [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' },
-                        { urls: 'stun:stun2.l.google.com:19302' },
-                        { urls: 'stun:stun3.l.google.com:19302' },
-                        { urls: 'stun:stun4.l.google.com:19302' }
-                    ]
-                }
-            });
+            console.log("Initializing PeerJS with ID:", myId, "Retry Count:", peerRetryCount);
+
+            // Load any custom signaling broker settings from localStorage
+            // Keys are only present if user explicitly configured a custom server
+            const savedHost = localStorage.getItem('peerjs-host');
+            const savedPort = localStorage.getItem('peerjs-port');
+            const savedPath = localStorage.getItem('peerjs-path');
+            const savedKey = localStorage.getItem('peerjs-key');
+            const hasCustomBroker = !!savedHost; // Custom broker only if host was explicitly set
+
+            let peer_options;
+            if (hasCustomBroker) {
+                // Use custom signaling server - user explicitly configured one
+                peer_options = {
+                    host: savedHost.trim(),
+                    port: parseInt(savedPort) || 443,
+                    path: savedPath ? savedPath.trim() : '/',
+                    key: savedKey ? savedKey.trim() : 'peerjs',
+                    secure: true,
+                    debug: 1,
+                    config: {
+                        iceServers: [
+                            { urls: 'stun:stun.l.google.com:19302' },
+                            { urls: 'stun:stun1.l.google.com:19302' },
+                            { urls: 'stun:global.stun.twilio.com:3478' }
+                        ]
+                    }
+                };
+                console.log("Using custom signaling broker:", peer_options.host + ':' + peer_options.port);
+            } else {
+                // Use default PeerJS cloud routing - do NOT pass host/port/path/key
+                // This lets the PeerJS library resolve 0.peerjs.com automatically
+                peer_options = {
+                    debug: 1,
+                    config: {
+                        iceServers: [
+                            { urls: 'stun:stun.l.google.com:19302' },
+                            { urls: 'stun:stun1.l.google.com:19302' },
+                            { urls: 'stun:global.stun.twilio.com:3478' }
+                        ]
+                    }
+                };
+                console.log("Using default PeerJS cloud routing.");
+            }
+
+            peer = new Peer(myId, peer_options);
 
             peer.on('open', (id) => {
                 console.log('PeerJS connection opened with ID:', id);
-                document.getElementById('lobby-chat-box').innerHTML += `<div style="color: var(--accent-green);">Successfully registered on broker.</div>`;
+                peerRetryCount = 0; // Reset retry count
 
-                // Hide adblocker error banner on successful connection
+                // Hide network error banner on successful connection
                 const errBanner = document.getElementById('lobby-network-error-banner');
                 if (errBanner) errBanner.classList.add('hidden');
 
+                document.getElementById('lobby-chat-box').innerHTML += `<div style="color: var(--accent-green);">Successfully registered on broker.</div>`;
+
                 if (isMultiplayer) {
-                    initVoiceChat();
+                    // Show mute buttons if local stream exists
+                    const lobbyMute = document.getElementById('btn-mute-mic');
+                    const gameMute = document.getElementById('btn-game-mute-mic');
+                    if (localAudioStream) {
+                        if (lobbyMute) lobbyMute.classList.remove('hidden');
+                        if (gameMute) gameMute.classList.remove('hidden');
+                        updateVoiceStatus();
+                    }
+
+                    // Set up incoming call handler
+                    peer.on('call', (call) => {
+                        console.log("Receiving voice call from:", call.peer);
+                        if (localAudioStream) {
+                            call.answer(localAudioStream);
+                        } else {
+                            call.answer(); // Answer without stream
+                        }
+                        activeCalls[call.peer] = call;
+                        setupCallHandlers(call, call.peer);
+                    });
+
+                    // Call all peers currently in the room
+                    connectVoiceToAllPeers();
                 }
 
                 if (hosting) {
@@ -3902,7 +4414,6 @@
 
                         conn.on('open', () => {
                             console.log('Client connected:', conn.peer);
-                            // Connection registered, wait for JOIN message
                         });
 
                         conn.on('data', (packet) => {
@@ -3921,11 +4432,72 @@
 
             peer.on('error', (err) => {
                 console.error("PeerJS error:", err);
-                document.getElementById('lobby-chat-box').innerHTML += `<div style="color: var(--accent-crimson);">Network Error: ${err.type}</div>`;
+                const chatBox = document.getElementById('lobby-chat-box');
 
-                if (err.type === 'network') {
-                    const errBanner = document.getElementById('lobby-network-error-banner');
-                    if (errBanner) errBanner.classList.remove('hidden');
+                // Handle ID Taken Error (especially common when reloading the host)
+                if (err.type === 'unavailable-id') {
+                    if (hosting) {
+                        const oldRoomCode = roomCode;
+                        roomCode = generateRandomRoomCode();
+                        console.warn(`ID host-${oldRoomCode} is already taken. Regenerating room code: ${roomCode}`);
+
+                        document.getElementById('lobby-code-box').innerText = roomCode;
+                        const lobbyCodeInput = document.getElementById('join-room-code-input');
+                        if (lobbyCodeInput) {
+                            lobbyCodeInput.value = roomCode;
+                        }
+                        if (chatBox) {
+                            chatBox.innerHTML += `<div style="color: var(--accent-gold); font-style: italic;">Room code ${oldRoomCode} was taken. Regenerating: ${roomCode}...</div>`;
+                        }
+
+                        peerRetryTimeout = setTimeout(() => {
+                            if (peer) {
+                                try { peer.destroy(); } catch (e) { }
+                            }
+                            initializePeer(true);
+                        }, 1000);
+                    } else {
+                        console.warn(`Client ID conflict. Retrying with a new random client ID...`);
+                        peerRetryTimeout = setTimeout(() => {
+                            if (peer) {
+                                try { peer.destroy(); } catch (e) { }
+                            }
+                            initializePeer(false);
+                        }, 1000);
+                    }
+                    return;
+                }
+
+                if (err.type === 'network' || err.type === 'server-error' || err.type === 'socket-error' || err.type === 'socket-closed') {
+                    if (peerRetryCount < MAX_PEER_RETRIES) {
+                        peerRetryCount++;
+                        console.log(`Broker connection failed (${err.type}). Retrying attempt ${peerRetryCount}/${MAX_PEER_RETRIES} in 2s...`);
+                        if (chatBox) {
+                            chatBox.innerHTML += `<div style="color: var(--accent-gold); font-style: italic;">Broker connection failed. Retrying (${peerRetryCount}/${MAX_PEER_RETRIES})...</div>`;
+                        }
+
+                        peerRetryTimeout = setTimeout(() => {
+                            if (peer) {
+                                try {
+                                    peer.destroy();
+                                } catch (e) {
+                                    console.error("Error destroying peer:", e);
+                                }
+                            }
+                            initializePeer(hosting);
+                        }, 2000);
+                        return; // Prevent showing the error banner until all retries fail
+                    } else {
+                        const errBanner = document.getElementById('lobby-network-error-banner');
+                        if (errBanner) errBanner.classList.remove('hidden');
+                        if (chatBox) {
+                            chatBox.innerHTML += `<div style="color: var(--accent-crimson);">Network Error: ${err.type}. Connection failed after ${MAX_PEER_RETRIES} attempts.</div>`;
+                        }
+                    }
+                } else {
+                    if (chatBox) {
+                        chatBox.innerHTML += `<div style="color: var(--accent-crimson);">Network Error: ${err.type}</div>`;
+                    }
                 }
 
                 if (err.type === 'peer-unavailable') {
@@ -4227,7 +4799,8 @@
                 const pTeam = pRoleInfo ? pRoleInfo.team : null;
                 // Determine if role should be visible (all Mafia members see each other's roles)
                 let showRole = (gameState === 'game_over') || p.id === recipientId ||
-                    (recipientTeam === 'mafia' && pTeam === 'mafia');
+                    (recipientTeam === 'mafia' && pTeam === 'mafia') ||
+                    (!p.alive && deckConfig.revealRolesOnDeath);
 
                 return {
                     id: p.id,
@@ -4612,6 +5185,7 @@
             deckConfig.vigilante = document.getElementById('multi-role-vigilante-toggle').checked;
             deckConfig.scout = document.getElementById('multi-role-scout-toggle').checked;
             deckConfig.jester = document.getElementById('multi-role-jester-toggle').checked;
+            deckConfig.revealRolesOnDeath = document.getElementById('multi-reveal-roles-toggle').checked;
             broadcastRoomState();
         }
 
@@ -4678,6 +5252,7 @@
             document.getElementById('multi-role-vigilante-toggle').checked = deckConfig.vigilante;
             document.getElementById('multi-role-scout-toggle').checked = deckConfig.scout;
             document.getElementById('multi-role-jester-toggle').checked = deckConfig.jester;
+            document.getElementById('multi-reveal-roles-toggle').checked = deckConfig.revealRolesOnDeath;
             document.getElementById('multi-role-villager-display').innerText = villagerCount;
             document.getElementById('multi-deck-summary').innerText = `Total Players: ${totalPlayers}`;
             document.getElementById('lobby-player-count').innerText = totalPlayers;
@@ -4736,6 +5311,7 @@
             // Trigger establishing voice connections with peers in the lobby
             if (isMultiplayer) {
                 connectVoiceToAllPeers();
+                updateVoiceStatus();
             }
         }
 
@@ -4920,6 +5496,7 @@
             timerConfig.night = parseInt(document.getElementById('solo-timer-night-display').innerText);
             timerConfig.vote = parseInt(document.getElementById('solo-timer-vote-display').innerText);
             timerConfig.defend = parseInt(document.getElementById('solo-timer-defend-display').innerText);
+            deckConfig.revealRolesOnDeath = document.getElementById('solo-reveal-roles-toggle').checked;
 
             myId = 'player-local';
             myRole = players[0].role;
@@ -5051,6 +5628,10 @@
 
             // Build player list UI cards
             renderGamePlayerCards();
+
+            if (isMultiplayer) {
+                updateVoiceStatus();
+            }
 
             // Set info
             document.getElementById('game-phase-name').innerText = `Night Time (Action Time) ${roundsCount}`;
@@ -5238,7 +5819,7 @@
                 }
 
                 // Card Art Setup
-                const showRole = !gameActive || p.id === myId || isMyMafiaTeammate;
+                const showRole = !gameActive || p.id === myId || isMyMafiaTeammate || (!p.alive && deckConfig.revealRolesOnDeath);
                 const displayRole = (showRole && p.role) ? p.role : null;
 
                 let artHTML = "";
@@ -5577,7 +6158,7 @@
                     const victim = players.find(p => p.id === targetKilled);
                     if (victim && victim.alive) {
                         victim.alive = false;
-                        deaths.push({ playerId: victim.id, name: victim.name, cause: 'mafia' });
+                        deaths.push({ playerId: victim.id, name: victim.name, role: victim.role, cause: 'mafia' });
                         victimName = victim.name;
                         deathOccurred = true;
                         nightLogsKill.push({
@@ -5598,7 +6179,7 @@
                     if (victim && victim.alive) {
                         victim.alive = false;
                         if (!deaths.some(d => d.playerId === victim.id)) {
-                            deaths.push({ playerId: victim.id, name: victim.name, cause: 'vigilante' });
+                            deaths.push({ playerId: victim.id, name: victim.name, role: victim.role, cause: 'vigilante' });
                         }
                         nightLogsKill.push({
                             displayLog: "Vigilante shot someone tonight.",
@@ -5609,7 +6190,7 @@
                         const targetRoleInfo = ROLES_INFO[victim.role];
                         if (targetRoleInfo && targetRoleInfo.team === 'town') {
                             vigPlayer.alive = false;
-                            deaths.push({ playerId: vigPlayer.id, name: vigPlayer.name, cause: 'suicide' });
+                            deaths.push({ playerId: vigPlayer.id, name: vigPlayer.name, role: vigPlayer.role, cause: 'suicide' });
                             nightLogsKill.push({
                                 displayLog: "Overcome with guilt, the Vigilante committed suicide.",
                                 actor: "vigilante",
@@ -5845,6 +6426,10 @@
                     enterNightPhase();
                 }
             }
+
+            if (isMultiplayer) {
+                updateVoiceStatus();
+            }
         }
 
         function enterDayDiscussion(deathOccurred, victimName, savedPlayerId, detectiveScanResult, doctorTargetId, scoutTrackResult, deaths, nightLogs, blockedPlayerId) {
@@ -5879,12 +6464,13 @@
                 // Fallback for empty logs
                 if (deaths && deaths.length > 0) {
                     deaths.forEach(d => {
+                        const roleText = (deckConfig.revealRolesOnDeath && d.role) ? ` They were: ${d.role.toUpperCase()}.` : "";
                         if (d.cause === 'mafia') {
-                            addNarrativeLog(`Tragedy has struck! ${d.name} was assassinated during the night.`, 'death');
+                            addNarrativeLog(`Tragedy has struck! ${d.name} was assassinated during the night.${roleText}`, 'death');
                         } else if (d.cause === 'vigilante') {
-                            addNarrativeLog(`A gunshot echoed! ${d.name} was shot by a Vigilante.`, 'death');
+                            addNarrativeLog(`A gunshot echoed! ${d.name} was shot by a Vigilante.${roleText}`, 'death');
                         } else if (d.cause === 'suicide') {
-                            addNarrativeLog(`Overcome with guilt, ${d.name} took their own life.`, 'death');
+                            addNarrativeLog(`Overcome with guilt, ${d.name} took their own life.${roleText}`, 'death');
                         }
                     });
                 } else if (deathOccurred) {
@@ -5994,6 +6580,12 @@
                     // Start bot conversations
                     if (isHost) {
                         startBotChatTimer();
+                    }
+
+                    // Automatically unmute for discussion
+                    isMuted = false;
+                    if (isMultiplayer) {
+                        updateVoiceStatus();
                     }
                 });
             });
@@ -6528,7 +7120,8 @@
 
         function triggerExileLog(exiledOccurred, name, role, tie) {
             if (exiledOccurred) {
-                addNarrativeLog(`${name} was voted out by majority consensus. They were: ${role.toUpperCase()}.`, 'death');
+                const roleText = deckConfig.revealRolesOnDeath ? ` They were: ${role.toUpperCase()}.` : "";
+                addNarrativeLog(`${name} was voted out by majority consensus.${roleText}`, 'death');
                 audioSynth.playGunshot();
 
                 const victim = players.find(p => p.name === name);
@@ -7086,8 +7679,8 @@
             setTimeout(() => {
                 let displayMsg = parsed.displayLog || log;
                 if (parsed.actor === 'doctor') {
-                    const isSuccess = (parsed.actionType === 'protect_success' || parsed.actionType === 'protect_mafia_fail' || parsed.actionType === 'protect_vig_fail' || parsed.actionType === 'protect_double_fail' || parsed.actionType === 'protect_saved');
-                    displayMsg = isSuccess ? "a doctor protect a player sucsessfuly" : "Doctor protected a player.";
+                    const isSuccess = (parsed.actionType === 'protect_success' || parsed.actionType === 'protect_mafia_fail' || parsed.actionType === 'protect_double_fail' || parsed.actionType === 'protect_saved');
+                    displayMsg = isSuccess ? "doctor protected the player" : "doctor didn't save the player";
                 }
                 descEl.innerText = displayMsg;
                 descEl.style.opacity = 1;
@@ -7214,27 +7807,67 @@
                         }, 400);
 
                     } else if (parsed.actionType.startsWith('protect')) {
-                        // Protect / saved effect
                         const frontActor = actorContainer.querySelector('.recap-card-front');
                         if (frontActor) frontActor.classList.add('recap-glow-heal');
                         audioSynth.playHeal();
 
+                        const isSuccess = (parsed.actionType === 'protect_success' || parsed.actionType === 'protect_mafia_fail' || parsed.actionType === 'protect_double_fail' || parsed.actionType === 'protect_saved');
+
                         setTimeout(() => {
                             const backTarget = targetContainer.querySelector('.recap-card-back');
                             if (backTarget) {
-                                backTarget.classList.add('recap-glow-heal');
-                                const shieldBadge = document.createElement('div');
-                                shieldBadge.style.cssText = "position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(42,207,122,0.15); display:flex; justify-content:center; align-items:center; font-size:4.5rem; z-index:4; text-shadow:0 0 15px rgba(42,207,122,0.8);";
-                                shieldBadge.innerHTML = "🛡️";
-                                backTarget.appendChild(shieldBadge);
-                            }
+                                if (isSuccess) {
+                                    // Shiny shield stops a bullet animation
+                                    backTarget.classList.add('recap-glow-heal');
 
-                            // If Mafia/Vigi failed to kill them, play gunshot fail!
-                            if (parsed.actionType.includes('fail')) {
-                                setTimeout(() => {
-                                    audioSynth.playGunshot();
-                                    targetContainer.classList.add('anim-shake');
-                                }, 500);
+                                    const shinyContainer = document.createElement('div');
+                                    shinyContainer.className = 'shield-shiny-container';
+
+                                    const shieldEl = document.createElement('div');
+                                    shieldEl.className = 'shield-shiny';
+                                    shieldEl.innerText = "🛡️";
+
+                                    const bulletEl = document.createElement('div');
+                                    bulletEl.className = 'shield-bullet';
+
+                                    const flashEl = document.createElement('div');
+                                    flashEl.className = 'shield-impact-flash';
+
+                                    shinyContainer.appendChild(shieldEl);
+                                    shinyContainer.appendChild(bulletEl);
+                                    shinyContainer.appendChild(flashEl);
+                                    backTarget.appendChild(shinyContainer);
+
+                                    // Bullet hits the shield at 420ms
+                                    setTimeout(() => {
+                                        audioSynth.playGunshot();
+                                        targetContainer.classList.add('anim-shake');
+                                    }, 420);
+                                } else {
+                                    // Shield broke animation
+                                    backTarget.style.borderColor = 'var(--accent-crimson)';
+
+                                    const shatterContainer = document.createElement('div');
+                                    shatterContainer.className = 'shield-shatter-container';
+
+                                    const leftShield = document.createElement('div');
+                                    leftShield.className = 'shield-part shield-left';
+                                    leftShield.innerText = "🛡️";
+
+                                    const rightShield = document.createElement('div');
+                                    rightShield.className = 'shield-part shield-right';
+                                    rightShield.innerText = "🛡️";
+
+                                    shatterContainer.appendChild(leftShield);
+                                    shatterContainer.appendChild(rightShield);
+                                    backTarget.appendChild(shatterContainer);
+
+                                    // Shield breaks and collapses
+                                    setTimeout(() => {
+                                        audioSynth.playDeath();
+                                        targetContainer.classList.add('anim-shake');
+                                    }, 200);
+                                }
                             }
                         }, 400);
 
@@ -7604,7 +8237,7 @@
             const pRoleInfo = p.role ? ROLES_INFO[p.role] : null;
             const myRoleInfo = myRole ? ROLES_INFO[myRole] : null;
             const isMyMafiaTeammate = pRoleInfo && myRoleInfo && pRoleInfo.team === 'mafia' && myRoleInfo.team === 'mafia';
-            const showRole = !gameActive || p.id === myId || isMyMafiaTeammate;
+            const showRole = !gameActive || p.id === myId || isMyMafiaTeammate || (!p.alive && deckConfig.revealRolesOnDeath);
             const displayRole = (showRole && p.role) ? p.role : null;
 
             if (p.id === myId) {
@@ -7812,7 +8445,7 @@
                 const devices = await navigator.mediaDevices.enumerateDevices();
                 const audioInputs = devices.filter(d => d.kind === 'audioinput');
                 selectEl.innerHTML = "";
-                
+
                 if (audioInputs.length === 0) {
                     const opt = document.createElement('option');
                     opt.value = "";
@@ -7933,7 +8566,7 @@
             // Check lexicographical order to prevent both initiating a call
             if (myId < targetPeerId) {
                 console.log(`Initiating voice call to ${targetPeerId}...`);
-                const callStream = localAudioStream || new MediaStream();
+                const callStream = getLocalAudioStreamOrSilent();
                 const call = peer.call(targetPeerId, callStream);
                 activeCalls[targetPeerId] = call;
                 setupCallHandlers(call, targetPeerId);
@@ -7941,18 +8574,35 @@
         }
 
         function setupCallHandlers(call, remotePeerId) {
+            let streamReceived = false;
+
+            const streamTimeout = setTimeout(() => {
+                if (!streamReceived) {
+                    console.warn(`Voice call with ${remotePeerId} timed out waiting for stream. Reconnecting...`);
+                    try {
+                        call.close();
+                    } catch (e) { }
+                    removeRemoteAudio(remotePeerId);
+                    delete activeCalls[remotePeerId];
+                }
+            }, 8000); // 8 seconds timeout
+
             call.on('stream', (remoteStream) => {
+                streamReceived = true;
+                clearTimeout(streamTimeout);
                 console.log(`Received remote audio stream from ${remotePeerId}`);
                 playRemoteAudio(remotePeerId, remoteStream);
             });
 
             call.on('close', () => {
+                clearTimeout(streamTimeout);
                 console.log(`Voice call with ${remotePeerId} closed.`);
                 removeRemoteAudio(remotePeerId);
                 delete activeCalls[remotePeerId];
             });
 
             call.on('error', (err) => {
+                clearTimeout(streamTimeout);
                 console.error(`Voice call error with ${remotePeerId}:`, err);
                 removeRemoteAudio(remotePeerId);
                 delete activeCalls[remotePeerId];
@@ -7965,6 +8615,8 @@
                 audioEl = document.createElement('audio');
                 audioEl.id = `audio-remote-${peerId}`;
                 audioEl.autoplay = true;
+                audioEl.playsInline = true;
+                audioEl.controls = false;
                 document.body.appendChild(audioEl);
             }
             audioEl.srcObject = stream;
@@ -7984,6 +8636,9 @@
         }
 
         function toggleMuteMic() {
+            if (gameState === 'night') {
+                return; // Cannot toggle during night
+            }
             isMuted = !isMuted;
             audioSynth.playClick();
             updateVoiceStatus();
@@ -7994,8 +8649,9 @@
         function updateVoiceStatus() {
             if (!isMultiplayer) return;
             const me = players.find(p => p.id === myId);
-            // Mute locally if we are dead, or if we clicked the manual mute button
-            const shouldLocalMute = !me || !me.alive || isMuted;
+            const isNight = (gameState === 'night');
+            // Mute locally if we are dead, or if we clicked the manual mute button, or if it is night time
+            const shouldLocalMute = !me || !me.alive || isMuted || isNight;
 
             if (localAudioStream) {
                 localAudioStream.getAudioTracks().forEach(track => {
@@ -8025,10 +8681,15 @@
             const lobbyMuteBtn = document.getElementById('btn-mute-mic');
             const gameMuteBtn = document.getElementById('btn-game-mute-mic');
 
-            const btnText = isCurrentlyMuted ? "Unmute Mic" : "Mute Mic";
+            const isNight = (gameState === 'night');
+            let btnText = isCurrentlyMuted ? "Unmute Mic" : "Mute Mic";
+            if (isNight) {
+                btnText = "Muted (Night)";
+            }
 
             if (lobbyMuteBtn) {
                 lobbyMuteBtn.innerText = btnText;
+                lobbyMuteBtn.disabled = isNight;
                 if (isCurrentlyMuted) {
                     lobbyMuteBtn.classList.add('btn-gold');
                     lobbyMuteBtn.classList.remove('btn-danger');
@@ -8039,6 +8700,7 @@
             }
             if (gameMuteBtn) {
                 gameMuteBtn.innerText = btnText;
+                gameMuteBtn.disabled = isNight;
                 if (isCurrentlyMuted) {
                     gameMuteBtn.classList.add('btn-gold');
                     gameMuteBtn.classList.remove('btn-danger');
@@ -8082,6 +8744,25 @@
                     audioSynth.playLobbyMusic();
                 }
             }, { once: true });
+
+            // Periodically check/refresh voice peer connections watchdog
+            setInterval(() => {
+                if (isMultiplayer && peer && !peer.destroyed) {
+                    connectVoiceToAllPeers();
+                }
+            }, 5000);
+
+            // Unlock and play blocked remote audio elements on click
+            document.addEventListener('click', () => {
+                if (isMultiplayer) {
+                    players.forEach(p => {
+                        const audioEl = document.getElementById(`audio-remote-${p.id}`);
+                        if (audioEl && audioEl.paused && audioEl.srcObject) {
+                            audioEl.play().catch(e => console.log("Unblocked remote audio play error:", e));
+                        }
+                    });
+                }
+            });
         });
     </script>
 </body>
