@@ -4321,48 +4321,23 @@
 
             console.log("Initializing PeerJS with ID:", myId, "Retry Count:", peerRetryCount);
 
-            // Load any custom signaling broker settings from localStorage
-            // Keys are only present if user explicitly configured a custom server
-            const savedHost = localStorage.getItem('peerjs-host');
-            const savedPort = localStorage.getItem('peerjs-port');
-            const savedPath = localStorage.getItem('peerjs-path');
-            const savedKey = localStorage.getItem('peerjs-key');
-            const hasCustomBroker = !!savedHost; // Custom broker only if host was explicitly set
-
-            let peer_options;
-            if (hasCustomBroker) {
-                // Use custom signaling server - user explicitly configured one
-                peer_options = {
-                    host: savedHost.trim(),
-                    port: parseInt(savedPort) || 443,
-                    path: savedPath ? savedPath.trim() : '/',
-                    key: savedKey ? savedKey.trim() : 'peerjs',
-                    secure: true,
-                    debug: 1,
-                    config: {
-                        iceServers: [
-                            { urls: 'stun:stun.l.google.com:19302' },
-                            { urls: 'stun:stun1.l.google.com:19302' },
-                            { urls: 'stun:global.stun.twilio.com:3478' }
-                        ]
-                    }
-                };
-                console.log("Using custom signaling broker:", peer_options.host + ':' + peer_options.port);
-            } else {
-                // Use default PeerJS cloud routing - do NOT pass host/port/path/key
-                // This lets the PeerJS library resolve 0.peerjs.com automatically
-                peer_options = {
-                    debug: 1,
-                    config: {
-                        iceServers: [
-                            { urls: 'stun:stun.l.google.com:19302' },
-                            { urls: 'stun:stun1.l.google.com:19302' },
-                            { urls: 'stun:global.stun.twilio.com:3478' }
-                        ]
-                    }
-                };
-                console.log("Using default PeerJS cloud routing.");
-            }
+            // Using your private Render broker as the permanent default
+            const peer_options = {
+                host: 'mafia-broker.onrender.com',
+                port: 443,
+                path: '/',
+                key: 'peerjs',
+                secure: true,
+                debug: 1,
+                config: {
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:global.stun.twilio.com:3478' }
+                    ]
+                }
+            };
+            console.log("Using permanent private broker: mafia-broker.onrender.com");
 
             peer = new Peer(myId, peer_options);
 
@@ -4434,7 +4409,7 @@
                 console.error("PeerJS error:", err);
                 const chatBox = document.getElementById('lobby-chat-box');
 
-                // Handle ID Taken Error (especially common when reloading the host)
+                // Handle ID Taken Error
                 if (err.type === 'unavailable-id') {
                     if (hosting) {
                         const oldRoomCode = roomCode;
@@ -4451,17 +4426,13 @@
                         }
 
                         peerRetryTimeout = setTimeout(() => {
-                            if (peer) {
-                                try { peer.destroy(); } catch (e) { }
-                            }
+                            if (peer) { try { peer.destroy(); } catch (e) { } }
                             initializePeer(true);
                         }, 1000);
                     } else {
                         console.warn(`Client ID conflict. Retrying with a new random client ID...`);
                         peerRetryTimeout = setTimeout(() => {
-                            if (peer) {
-                                try { peer.destroy(); } catch (e) { }
-                            }
+                            if (peer) { try { peer.destroy(); } catch (e) { } }
                             initializePeer(false);
                         }, 1000);
                     }
@@ -4477,16 +4448,10 @@
                         }
 
                         peerRetryTimeout = setTimeout(() => {
-                            if (peer) {
-                                try {
-                                    peer.destroy();
-                                } catch (e) {
-                                    console.error("Error destroying peer:", e);
-                                }
-                            }
+                            if (peer) { try { peer.destroy(); } catch (e) { } }
                             initializePeer(hosting);
                         }, 2000);
-                        return; // Prevent showing the error banner until all retries fail
+                        return;
                     } else {
                         const errBanner = document.getElementById('lobby-network-error-banner');
                         if (errBanner) errBanner.classList.remove('hidden');
