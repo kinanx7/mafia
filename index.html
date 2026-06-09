@@ -7608,7 +7608,24 @@
 
         function playNightRecapAnimations(nightLogs, callback) {
             nightResultsCallback = callback;
-            nightRecapQueue = [...nightLogs];
+
+            // NEW FILTER: Only allow Mafia, Doctor, or Calm events to show in the animation
+            const filteredLogs = nightLogs.filter(log => {
+                const parsed = parseNightLog(log);
+                return parsed.actor === 'mafia' || parsed.actor === 'doctor' || parsed.actor === 'calm';
+            });
+
+            // If the filter removes everything (e.g. only a Detective acted), show a quick "Calm" animation so the game doesn't freeze
+            if (filteredLogs.length === 0) {
+                filteredLogs.push({
+                    displayLog: "Morning arrives...",
+                    actor: "calm",
+                    targetPlayerName: null,
+                    actionType: "calm"
+                });
+            }
+
+            nightRecapQueue = [...filteredLogs];
             nightRecapActive = true;
 
             document.getElementById('night-results-overlay').classList.remove('hidden');
