@@ -32,6 +32,39 @@
             --card-height: 240px;
         }
 
+        /* MOBILE BRIDGE: Only applies to small screens */
+        @media (max-width: 600px) {
+            :root {
+                --card-width: 90px;
+                --card-height: 160px;
+            }
+
+            body {
+                font-size: 14px;
+            }
+
+            .glass-panel {
+                padding: 15px;
+                width: 98%;
+            }
+
+            .game-bottom-area {
+                height: 250px;
+            }
+
+            .players-scroll-container {
+                padding: 5px;
+            }
+
+            .lobby-layout {
+                gap: 10px;
+            }
+
+            .btn {
+                padding: 8px 12px;
+            }
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -50,6 +83,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            /* Prevents phone bounce */
+            overscroll-behavior: none;
+            touch-action: manipulation;
         }
 
         /* Fullscreen Backdrops */
