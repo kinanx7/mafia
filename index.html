@@ -648,11 +648,13 @@
         .lobby-section {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
+            /* Compacting gaps */
             background: rgba(0, 0, 0, 0.15);
             border: 1px solid rgba(255, 255, 255, 0.03);
             border-radius: 12px;
-            padding: 20px;
+            padding: 15px;
+            /* Compacting padding */
         }
 
         .lobby-section-title {
@@ -692,9 +694,8 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            /* Reduced gap to fit more roles */
-            max-height: 220px;
-            /* Reduced to fit screens without main scrollbar */
+            max-height: 150px;
+            /* Reduced to eliminate main page scrolling */
             overflow-y: auto;
             padding-right: 8px;
         }
@@ -857,8 +858,8 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            max-height: 220px;
-            /* Matched height with roles panel */
+            max-height: 150px;
+            /* Reduced to eliminate main page scrolling */
             overflow-y: auto;
             padding-right: 8px;
         }
@@ -911,12 +912,12 @@
         }
 
         .lobby-chat-wrapper {
-            margin-top: 15px;
+            margin-top: 10px;
             display: flex;
             flex-direction: column;
             gap: 10px;
-            height: 110px;
-            /* Reduced to ensure "Start" button is visible */
+            height: 90px;
+            /* Reduced to keep buttons on screen */
         }
 
         .lobby-chat-messages {
@@ -2710,7 +2711,7 @@
                 Developed by &nbsp;<strong style="color:rgba(212,175,55,0.8); font-weight:600;">Eng. Kinan
                     Rahal</strong>
                 &nbsp;&amp;&nbsp;
-                <strong style="color:rgba(212,175,55,0.8); font-weight:600;">Eng. Muhammet Battal Oğlu</strong>
+                <strong style="color:rgba(212,175,55,0.8); font-weight:600;">Eng. Muhammet Battaloğlu</strong>
             </div>
         </div>
 
@@ -2826,60 +2827,68 @@
             <div class="lobby-section">
                 <div class="lobby-section-title">Game Options</div>
 
-                <div class="input-group">
-                    <label>Number of Bots</label>
-                    <div style="display: flex; gap: 15px; align-items: center; margin-top: 10px;">
-                        <input type="range" id="solo-bots-count" min="4" max="14" value="6"
-                            oninput="document.getElementById('bots-count-val').innerText = this.value; recalculateSoloDeck();"
-                            style="width: 70%; accent-color: var(--accent-crimson);">
-                        <span style="font-family: 'Cinzel', serif; font-size: 1.2rem;" id="bots-count-val">6</span>
+                <div class="input-group" style="margin-bottom: 10px;">
+                    <label>Bot Count</label>
+                    <div class="role-count-adjuster" style="justify-content: flex-start; margin-top: 5px;">
+                        <button class="count-btn"
+                            onclick="var input = document.getElementById('solo-bots-count'); var v = parseInt(input.value)-1; if(v<3)v=3; input.value=v; recalculateSoloDeck();">-</button>
+                        <input type="text" id="solo-bots-count" class="text-input" value="6"
+                            style="width: 50px; text-align: center; padding: 4px; font-weight: bold; height: 26px; border-radius: 6px;"
+                            readonly>
+                        <button class="count-btn"
+                            onclick="var input = document.getElementById('solo-bots-count'); var v = parseInt(input.value)+1; if(v>13)v=13; input.value=v; recalculateSoloDeck();">+</button>
                     </div>
-                    <div id="solo-role-warning"
-                        style="color: #ff4d4d; font-size: 0.82rem; margin-top: 8px; font-weight: 500; display: none;">
-                        ⚠️ Too many special roles for the selected player count!
-                    </div>
+                </div>
+
+                <div id="solo-role-warning"
+                    style="color: #ff4d4d; font-size: 0.82rem; margin-top: -5px; margin-bottom: 10px; font-weight: 500; display: none;">
+                    ⚠️ Too many special roles for the selected player count!
                 </div>
 
                 <div class="input-group">
                     <label>Phase Timers (Seconds)</label>
-                    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
-                        <div style="display: flex; justify-content: space-between;">
+                    <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
                             <span>Day Time (Discuss Time)</span>
                             <div class="role-count-adjuster">
                                 <button class="count-btn" onclick="adjustTimer('solo-timer-discuss', -5)">-</button>
                                 <span class="count-display" id="solo-timer-discuss-display"
-                                    style="width: 35px;">30</span>
+                                    style="width: 30px;">30</span>
                                 <button class="count-btn" onclick="adjustTimer('solo-timer-discuss', 5)">+</button>
                             </div>
                         </div>
-                        <div style="display: flex; justify-content: space-between;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
                             <span>Night Time (Action Time)</span>
                             <div class="role-count-adjuster">
                                 <button class="count-btn" onclick="adjustTimer('solo-timer-night', -5)">-</button>
-                                <span class="count-display" id="solo-timer-night-display" style="width: 35px;">20</span>
+                                <span class="count-display" id="solo-timer-night-display" style="width: 30px;">20</span>
                                 <button class="count-btn" onclick="adjustTimer('solo-timer-night', 5)">+</button>
                             </div>
                         </div>
-                        <div style="display: flex; justify-content: space-between;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
                             <span>Voting</span>
                             <div class="role-count-adjuster">
                                 <button class="count-btn" onclick="adjustTimer('solo-timer-vote', -5)">-</button>
-                                <span class="count-display" id="solo-timer-vote-display" style="width: 35px;">20</span>
+                                <span class="count-display" id="solo-timer-vote-display" style="width: 30px;">20</span>
                                 <button class="count-btn" onclick="adjustTimer('solo-timer-vote', 5)">+</button>
                             </div>
                         </div>
-                        <div style="display: flex; justify-content: space-between;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
                             <span>Defending Time</span>
                             <div class="role-count-adjuster">
                                 <button class="count-btn" onclick="adjustTimer('solo-timer-defend', -5)">-</button>
                                 <span class="count-display" id="solo-timer-defend-display"
-                                    style="width: 35px;">15</span>
+                                    style="width: 30px;">15</span>
                                 <button class="count-btn" onclick="adjustTimer('solo-timer-defend', 5)">+</button>
                             </div>
                         </div>
 
                         <div
-                            style="display: flex; justify-content: space-between; margin-top: 12px; align-items: center; font-size: 0.95rem;">
+                            style="display: flex; justify-content: space-between; margin-top: 8px; align-items: center; font-size: 0.9rem;">
                             <span>Reveal Roles on Death</span>
                             <div class="role-controls">
                                 <label class="role-switch">
@@ -2896,7 +2905,7 @@
             <!-- Right Side Role Configuration -->
             <div class="lobby-section">
                 <div class="lobby-section-title">Customize Role Deck</div>
-                <div class="deck-customizer">
+                <div class="deck-customizer" style="max-height: 245px; overflow-y: auto;">
                     <!-- Mafia Counts -->
                     <div class="deck-row">
                         <div class="role-badge-info">
@@ -3049,7 +3058,8 @@
                             style="color: var(--text-muted);">4</span>
                     </div>
 
-                    <div class="deck-total-summary" id="solo-deck-summary">Total Players: 7</div>
+                    <div class="deck-total-summary" id="solo-deck-summary" style="margin-top: 5px;">Total Players: 7
+                    </div>
                 </div>
             </div>
         </div>
@@ -3213,10 +3223,14 @@
                     </div>
                 </div>
 
-                <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px; margin-top: 8px;">
+                <div
+                    style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
                     <span
                         style="color: var(--accent-gold); font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase;">Role
                         Deck Configuration</span>
+                    <button class="btn" onclick="toggleRolesImagePopup(true)"
+                        style="padding: 4px 10px; font-size: 0.75rem; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2);">ℹ️
+                        Info</button>
                 </div>
 
                 <!-- SCROLLABLE ROLES SECTION: Only the roles scroll now -->
@@ -3568,10 +3582,10 @@
             <div class="setting-row">
                 <label>Atmospheric Music</label>
                 <div class="slider-wrapper">
-                    <input type="range" class="vol-slider" id="music-slider" min="0" max="100" value="30"
+                    <input type="range" class="vol-slider" id="music-slider" min="0" max="100" value="5"
                         oninput="changeVolume('music', this.value)">
                     <span id="music-vol-display"
-                        style="font-family: monospace; width: 30px; text-align: right;">30%</span>
+                        style="font-family: monospace; width: 30px; text-align: right;">5%</span>
                 </div>
             </div>
 
@@ -3671,6 +3685,26 @@
                     style="min-width: 180px; font-size: 1rem; padding: 12px 30px; box-shadow: 0 0 15px var(--accent-gold-glow);">Continue
                     to Day</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Fullscreen Roles Image Overlay -->
+    <div class="modal-overlay hidden" id="roles-image-overlay" onclick="toggleRolesImagePopup(false)"
+        style="z-index: 300;">
+        <div class="glass-panel role-popup-content"
+            style="max-width: 700px; width: 95%; padding: 20px; display: flex; flex-direction: column; align-items: center;"
+            onclick="event.stopPropagation()">
+            <h3 class="heading-serif" style="color: var(--accent-gold); margin-bottom: 15px; font-size: 1.4rem;">Role
+                Information</h3>
+
+            <!-- Scrollable container for the image -->
+            <div class="deck-customizer"
+                style="width: 100%; max-height: 70vh; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.5);">
+                <img src="roles.png" alt="Roles Information" style="width: 100%; height: auto; display: block;">
+            </div>
+
+            <button class="btn" style="margin-top: 15px; width: 100%; font-size: 1rem;"
+                onclick="toggleRolesImagePopup(false)">Close</button>
         </div>
     </div>
 
@@ -4089,6 +4123,16 @@
         }
 
         const audioSynth = new SoundSynth();
+
+        function toggleRolesImagePopup(show) {
+            audioSynth.playClick();
+            const overlay = document.getElementById('roles-image-overlay');
+            if (show) {
+                overlay.classList.remove('hidden');
+            } else {
+                overlay.classList.add('hidden');
+            }
+        }
 
         function toggleSettingsModal(show) {
             audioSynth.playClick();
@@ -8017,20 +8061,19 @@
         function playNightRecapAnimations(nightLogs, callback) {
             nightResultsCallback = callback;
 
-            let shouldPlayKillVideo = false;
-            let shouldPlaySaveVideo = false;
-            let victimName = "";
-            let savedName = "";
+            let videoQueue = [];
 
+            // Scan logs to queue up all relevant cutscenes
             for (const log of nightLogs) {
                 const parsed = parseNightLog(log);
-                if (parsed.actor === 'mafia' && parsed.actionType === 'kill') {
-                    shouldPlayKillVideo = true;
-                    victimName = parsed.targetPlayerName;
+                if (parsed.actor === 'doctor' && (parsed.actionType === 'protect_mafia_fail' || parsed.actionType === 'protect_double_fail' || parsed.actionType === 'protect_vig_fail')) {
+                    videoQueue.push({ type: 'save', name: parsed.targetPlayerName });
                 }
-                if (parsed.actor === 'doctor' && (parsed.actionType === 'protect_mafia_fail' || parsed.actionType === 'protect_double_fail')) {
-                    shouldPlaySaveVideo = true;
-                    savedName = parsed.targetPlayerName;
+                if (parsed.actor === 'mafia' && parsed.actionType === 'kill') {
+                    videoQueue.push({ type: 'mafia_kill', name: parsed.targetPlayerName });
+                }
+                if (parsed.actor === 'vigilante' && parsed.actionType === 'shoot') {
+                    videoQueue.push({ type: 'vig_kill', name: parsed.targetPlayerName });
                 }
             }
 
@@ -8040,7 +8083,7 @@
             const overlay = document.getElementById('night-results-overlay');
             const closeBtn = document.getElementById('btn-close-night-results');
 
-            if (shouldPlaySaveVideo || shouldPlayKillVideo) {
+            if (videoQueue.length > 0) {
                 nightRecapActive = true;
                 cssStage.classList.add('hidden');
                 videoEl.classList.remove('hidden');
@@ -8048,31 +8091,51 @@
                 overlay.classList.remove('hidden');
                 descEl.style.opacity = 1;
 
-                if (shouldPlaySaveVideo) {
-                    videoEl.src = "doctor_save.mp4";
-                    videoEl.style.borderColor = "var(--accent-green)";
-                    videoEl.style.boxShadow = "0 0 25px rgba(46, 207, 122, 0.6)";
-                    descEl.innerText = `The Doctor successfully intervened and saved ${savedName}!`;
-                    audioSynth.playHeal();
-                } else if (shouldPlayKillVideo) {
-                    videoEl.src = "mafia_kill.mp4";
-                    videoEl.style.borderColor = "var(--accent-crimson)";
-                    videoEl.style.boxShadow = "0 0 25px var(--accent-crimson-glow)";
-                    descEl.innerText = `The Mafia assassinated ${victimName}...`;
-                    audioSynth.playGunshot();
+                // Function to play videos one after another
+                function playNextCutscene() {
+                    if (videoQueue.length === 0) {
+                        closeBtn.classList.remove('hidden');
+                        setTimeout(() => { if (nightRecapActive) closeNightResultsOverlay(); }, 3000);
+                        return;
+                    }
+
+                    const scene = videoQueue.shift();
+
+                    if (scene.type === 'save') {
+                        videoEl.src = "doctor_save.mp4";
+                        videoEl.style.borderColor = "var(--accent-green)";
+                        videoEl.style.boxShadow = "0 0 25px rgba(46, 207, 122, 0.6)";
+                        descEl.innerText = `The Doctor successfully intervened and saved ${scene.name}!`;
+                        audioSynth.playHeal();
+                    } else if (scene.type === 'mafia_kill') {
+                        videoEl.src = "mafia_kill.mp4";
+                        videoEl.style.borderColor = "var(--accent-crimson)";
+                        videoEl.style.boxShadow = "0 0 25px var(--accent-crimson-glow)";
+                        descEl.innerText = `The Mafia assassinated ${scene.name}...`;
+                        audioSynth.playGunshot();
+                    } else if (scene.type === 'vig_kill') {
+                        videoEl.src = "vigilante_kill.mp4";
+                        videoEl.style.borderColor = "var(--accent-gold)";
+                        videoEl.style.boxShadow = "0 0 25px var(--accent-gold-glow)";
+                        descEl.innerText = `The Vigilante shot ${scene.name}...`;
+                        audioSynth.playGunshot();
+                    }
+
+                    videoEl.onended = playNextCutscene;
+
+                    videoEl.play().catch(e => {
+                        console.warn("Video playback failed/missing, skipping to next.", e);
+                        if (videoQueue.length > 0) {
+                            playNextCutscene();
+                        } else {
+                            videoEl.classList.add('hidden');
+                            cssStage.classList.remove('hidden');
+                            executeCSSRecapQueue(nightLogs);
+                        }
+                    });
                 }
 
-                videoEl.onended = () => {
-                    closeBtn.classList.remove('hidden');
-                    setTimeout(() => { if (nightRecapActive) closeNightResultsOverlay(); }, 3000);
-                };
-
-                videoEl.play().catch(e => {
-                    console.warn("Video playback failed/missing, falling back to CSS animations.", e);
-                    videoEl.classList.add('hidden');
-                    cssStage.classList.remove('hidden');
-                    executeCSSRecapQueue(nightLogs);
-                });
+                playNextCutscene();
                 return;
             }
 
@@ -8084,7 +8147,7 @@
         function executeCSSRecapQueue(nightLogs) {
             const filteredLogs = nightLogs.filter(log => {
                 const parsed = parseNightLog(log);
-                return parsed.actor === 'mafia' || parsed.actor === 'doctor' || parsed.actor === 'calm';
+                return parsed.actor === 'mafia' || parsed.actor === 'doctor' || parsed.actor === 'vigilante' || parsed.actor === 'calm';
             });
 
             if (filteredLogs.length === 0) {
