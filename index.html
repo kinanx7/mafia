@@ -3692,14 +3692,15 @@
                 style="color: var(--accent-gold); letter-spacing: 3px; font-size: 1.8rem; text-shadow: 0 0 10px var(--accent-gold-glow);">
                 NIGHT RECAP</h2>
 
-            <!-- Animation Stage -->
+            <!-- NEW: Video Player for Cutscenes -->
+            <video id="night-recap-video" class="hidden"
+                style="width: 100%; max-height: 350px; border-radius: 12px; object-fit: cover; border: 2px solid transparent; transition: border-color 0.3s, box-shadow 0.3s;"
+                playsinline></video>
+
+            <!-- Animation Stage (Fallback for non-video events) -->
             <div id="night-anim-stage"
                 style="display: flex; align-items: center; justify-content: center; gap: 35px; min-height: 280px; width: 100%; position: relative; margin: 20px 0;">
-                <!-- Left Card: Actor -->
-                <div id="night-anim-actor-container" style="position: relative; transition: all 0.5s ease;">
-                </div>
-
-                <!-- Action Effect Middle -->
+                <div id="night-anim-actor-container" style="position: relative; transition: all 0.5s ease;"></div>
                 <div id="night-anim-effect-container"
                     style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 100px; position: relative; height: 100px;">
                     <div id="night-anim-action-icon"
@@ -3709,10 +3710,7 @@
                         style="width: 0px; height: 3px; background: currentColor; transition: width 0.5s ease; margin-top: 10px; opacity: 0.7;">
                     </div>
                 </div>
-
-                <!-- Right Card: Target -->
-                <div id="night-anim-target-container" style="position: relative; transition: all 0.5s ease;">
-                </div>
+                <div id="night-anim-target-container" style="position: relative; transition: all 0.5s ease;"></div>
             </div>
 
             <!-- Description / Log Message -->
@@ -8100,20 +8098,78 @@
         function playNightRecapAnimations(nightLogs, callback) {
             nightResultsCallback = callback;
 
-            // NEW FILTER: Only allow Mafia, Doctor, or Calm events to show in the animation
+            let shouldPlayKillVideo = false;
+            let shouldPlaySaveVideo = false;
+            let victimName = "";
+            let savedName = "";
+
+            for (const log of nightLogs) {
+                const parsed = parseNightLog(log);
+                if (parsed.actor === 'mafia' && parsed.actionType === 'kill') {
+                    shouldPlayKillVideo = true;
+                    victimName = parsed.targetPlayerName;
+                }
+                if (parsed.actor === 'doctor' && (parsed.actionType === 'protect_mafia_fail' || parsed.actionType === 'protect_double_fail')) {
+                    shouldPlaySaveVideo = true;
+                    savedName = parsed.targetPlayerName;
+                }
+            }
+
+            const videoEl = document.getElementById('night-recap-video');
+            const cssStage = document.getElementById('night-anim-stage');
+            const descEl = document.getElementById('night-anim-description');
+            const overlay = document.getElementById('night-results-overlay');
+            const closeBtn = document.getElementById('btn-close-night-results');
+
+            if (shouldPlaySaveVideo || shouldPlayKillVideo) {
+                nightRecapActive = true;
+                cssStage.classList.add('hidden');
+                videoEl.classList.remove('hidden');
+                closeBtn.classList.add('hidden');
+                overlay.classList.remove('hidden');
+                descEl.style.opacity = 1;
+
+                if (shouldPlaySaveVideo) {
+                    videoEl.src = "doctor_save.mp4";
+                    videoEl.style.borderColor = "var(--accent-green)";
+                    videoEl.style.boxShadow = "0 0 25px rgba(46, 207, 122, 0.6)";
+                    descEl.innerText = `The Doctor successfully intervened and saved ${savedName}!`;
+                    audioSynth.playHeal();
+                } else if (shouldPlayKillVideo) {
+                    videoEl.src = "mafia_kill.mp4";
+                    videoEl.style.borderColor = "var(--accent-crimson)";
+                    videoEl.style.boxShadow = "0 0 25px var(--accent-crimson-glow)";
+                    descEl.innerText = `The Mafia assassinated ${victimName}...`;
+                    audioSynth.playGunshot();
+                }
+
+                videoEl.onended = () => {
+                    closeBtn.classList.remove('hidden');
+                    setTimeout(() => { if (nightRecapActive) closeNightResultsOverlay(); }, 3000);
+                };
+
+                videoEl.play().catch(e => {
+                    console.warn("Video playback failed/missing, falling back to CSS animations.", e);
+                    videoEl.classList.add('hidden');
+                    cssStage.classList.remove('hidden');
+                    executeCSSRecapQueue(nightLogs);
+                });
+                return;
+            }
+
+            videoEl.classList.add('hidden');
+            cssStage.classList.remove('hidden');
+            executeCSSRecapQueue(nightLogs);
+        }
+
+        function executeCSSRecapQueue(nightLogs) {
             const filteredLogs = nightLogs.filter(log => {
                 const parsed = parseNightLog(log);
                 return parsed.actor === 'mafia' || parsed.actor === 'doctor' || parsed.actor === 'calm';
             });
 
-            // If the filter removes everything (e.g. only a Detective acted), show a quick "Calm" animation so the game doesn't freeze
             if (filteredLogs.length === 0) {
-                filteredLogs.push({
-                    displayLog: "Morning arrives...",
-                    actor: "calm",
-                    targetPlayerName: null,
-                    actionType: "calm"
-                });
+                filteredLogs.push({ displayLog: "Morning arrives...", actor: "calm", targetPlayerName: null, actionType: "calm" });
             }
 
             nightRecapQueue = [...filteredLogs];
@@ -8125,304 +8181,19 @@
             playNextRecap();
         }
 
-        function playNextRecap() {
-            if (nightRecapQueue.length === 0) {
-                // Done with all animations, reveal Continue button
-                const descEl = document.getElementById('night-anim-description');
-                descEl.innerText = "All night events resolved.";
-                descEl.style.opacity = 1;
-
-                document.getElementById('btn-close-night-results').classList.remove('hidden');
-
-                // Also auto close after 2.5 seconds to make it fluid
-                setTimeout(() => {
-                    if (nightRecapActive) {
-                        closeNightResultsOverlay();
-                    }
-                }, 2500);
-                return;
-            }
-
-            const log = nightRecapQueue.shift();
-            const parsed = parseNightLog(log);
-
-            const actorContainer = document.getElementById('night-anim-actor-container');
-            const targetContainer = document.getElementById('night-anim-target-container');
-            const effectContainer = document.getElementById('night-anim-effect-container');
-            const actionIcon = document.getElementById('night-anim-action-icon');
-            const actionLine = document.getElementById('night-anim-action-line');
-            const descEl = document.getElementById('night-anim-description');
-
-            // Reset state
-            actorContainer.innerHTML = "";
-            targetContainer.innerHTML = "";
-            actorContainer.className = "";
-            targetContainer.className = "";
-            effectContainer.className = "";
-            actionLine.style.width = "0px";
-            actionIcon.innerHTML = "";
-            actionIcon.style.color = "var(--text-muted)";
-            actionLine.style.color = "var(--text-muted)";
-            descEl.style.opacity = 0;
-
-            setTimeout(() => {
-                let displayMsg = parsed.displayLog || log;
-                if (parsed.actor === 'doctor') {
-                    const isSuccess = (parsed.actionType === 'protect_success' || parsed.actionType === 'protect_mafia_fail' || parsed.actionType === 'protect_double_fail' || parsed.actionType === 'protect_saved');
-                    displayMsg = isSuccess ? "doctor protected the player" : "doctor didn't save the player";
-                }
-                descEl.innerText = displayMsg;
-                descEl.style.opacity = 1;
-
-                if (parsed.actionType === 'calm') {
-                    // Calm night - show sunrise symbol
-                    actorContainer.innerHTML = "";
-                    targetContainer.innerHTML = "";
-
-                    actionIcon.innerHTML = "🌅";
-                    actionIcon.style.color = "var(--accent-gold)";
-                    effectContainer.classList.add('calm-stage-glow');
-
-                    audioSynth.playHeal();
-
-                    setTimeout(playNextRecap, 2500);
-                    return;
-                }
-
-                // Normal action
-                const targetObj = players.find(p => p.name === parsed.targetPlayerName);
-                const targetRole = targetObj ? targetObj.role : 'villager';
-
-                // Actor Setup
-                actorContainer.innerHTML = createRecapCardHTML(parsed.actor, parsed.actor.toUpperCase());
-
-                // Target Setup - always keep face down (cardback) to protect player identity
-                let targetCardDisplayName = "A Player";
-                if (parsed.actionType === 'suicide') {
-                    targetCardDisplayName = "Vigilante";
-                }
-
-                targetContainer.innerHTML = createRecapCardHTML(targetRole, targetCardDisplayName, true);
-
-                // Setup action icon & colors
-                let iconStr = "⚙️";
-                let actionColor = "var(--text-muted)";
-
-                if (parsed.actionType === 'block' || parsed.actionType === 'block_victim') {
-                    iconStr = "🔒";
-                    actionColor = "#cf2acf";
-                } else if (parsed.actionType === 'spy') {
-                    iconStr = "🔍";
-                    actionColor = "var(--accent-blue)";
-                } else if (parsed.actionType === 'track') {
-                    iconStr = "👣";
-                    actionColor = "#2acacf";
-                } else if (parsed.actionType.startsWith('protect')) {
-                    iconStr = "🛡️";
-                    actionColor = "var(--accent-green)";
-                } else if (parsed.actionType === 'kill' || parsed.actionType === 'shoot' || parsed.actionType === 'mafia_attack' || parsed.actionType === 'vig_shoot') {
-                    iconStr = "💥";
-                    actionColor = "var(--accent-crimson)";
-                } else if (parsed.actionType === 'suicide') {
-                    iconStr = "💀";
-                    actionColor = "var(--accent-crimson)";
-                } else if (parsed.actionType === 'frame') {
-                    iconStr = "🎭";
-                    actionColor = "#cf8a2a";
-                }
-
-                actionIcon.innerHTML = iconStr;
-                actionIcon.style.color = actionColor;
-                actionLine.style.color = actionColor;
-
-                // Run animations sequentially
-                setTimeout(() => {
-                    // Start action line connection
-                    actionLine.style.width = "80px";
-
-                    if (parsed.actionType === 'kill' || parsed.actionType === 'shoot' || parsed.actionType === 'mafia_attack' || parsed.actionType === 'vig_shoot') {
-                        // Actor lunges right
-                        actorContainer.classList.add('anim-lunge-right');
-                        audioSynth.playGunshot();
-
-                        // Launch bullet projectile
-                        const bullet = document.createElement('div');
-                        bullet.className = 'anim-bullet-right';
-                        document.getElementById('night-anim-stage').appendChild(bullet);
-
-                        // Trigger hit on target card
-                        setTimeout(() => {
-                            bullet.remove();
-                            targetContainer.classList.add('anim-shake');
-
-                            // Crack card
-                            setTimeout(() => {
-                                const cracks = targetContainer.querySelectorAll('.card-crack-overlay');
-                                cracks.forEach(c => c.classList.add('cracked'));
-
-                                // Stamp "ELIMINATED" badge dynamically on target card's cardback
-                                const badge = document.createElement('span');
-                                badge.className = "card-status-badge dead";
-                                badge.style.cssText = "position:absolute; top:45%; left:50%; transform:translate(-50%, -50%) rotate(-25deg); background:rgba(207,42,42,0.95); color:#fff; padding:6px 12px; border-radius:4px; font-size:1rem; font-weight:700; border:1px solid rgba(255,255,255,0.25); z-index:10; box-shadow:0 0 10px rgba(0,0,0,0.5);";
-                                badge.innerText = "TARGETED";
-                                const backCard = targetContainer.querySelector('.recap-card-back');
-                                if (backCard) backCard.appendChild(badge);
-
-                                targetContainer.style.opacity = 0.55;
-                                targetContainer.style.filter = "grayscale(85%)";
-                            }, 400);
-
-                        }, 400);
-
-                    } else if (parsed.actionType === 'suicide') {
-                        // Guilt Suicide (Self action)
-                        actorContainer.classList.add('anim-shake');
-                        targetContainer.classList.add('anim-shake');
-                        audioSynth.playDeath();
-
-                        setTimeout(() => {
-                            const cracks = targetContainer.querySelectorAll('.card-crack-overlay');
-                            cracks.forEach(c => c.classList.add('cracked'));
-
-                            const badge = document.createElement('span');
-                            badge.className = "card-status-badge dead";
-                            badge.style.cssText = "position:absolute; top:45%; left:50%; transform:translate(-50%, -50%) rotate(-25deg); background:rgba(207,42,42,0.95); color:#fff; padding:6px 12px; border-radius:4px; font-size:1rem; font-weight:700; border:1px solid rgba(255,255,255,0.25); z-index:10; box-shadow:0 0 10px rgba(0,0,0,0.5);";
-                            badge.innerText = "SUICIDE";
-                            const backCard = targetContainer.querySelector('.recap-card-back');
-                            if (backCard) backCard.appendChild(badge);
-
-                            targetContainer.style.opacity = 0.55;
-                            targetContainer.style.filter = "grayscale(85%)";
-                        }, 400);
-
-                    } else if (parsed.actionType.startsWith('protect')) {
-                        const frontActor = actorContainer.querySelector('.recap-card-front');
-                        if (frontActor) frontActor.classList.add('recap-glow-heal');
-                        audioSynth.playHeal();
-
-                        const isSuccess = (parsed.actionType === 'protect_success' || parsed.actionType === 'protect_mafia_fail' || parsed.actionType === 'protect_double_fail' || parsed.actionType === 'protect_saved');
-
-                        setTimeout(() => {
-                            const backTarget = targetContainer.querySelector('.recap-card-back');
-                            if (backTarget) {
-                                if (isSuccess) {
-                                    // Shiny shield stops a bullet animation
-                                    backTarget.classList.add('recap-glow-heal');
-
-                                    const shinyContainer = document.createElement('div');
-                                    shinyContainer.className = 'shield-shiny-container';
-
-                                    const shieldEl = document.createElement('div');
-                                    shieldEl.className = 'shield-shiny';
-                                    shieldEl.innerText = "🛡️";
-
-                                    const bulletEl = document.createElement('div');
-                                    bulletEl.className = 'shield-bullet';
-
-                                    const flashEl = document.createElement('div');
-                                    flashEl.className = 'shield-impact-flash';
-
-                                    shinyContainer.appendChild(shieldEl);
-                                    shinyContainer.appendChild(bulletEl);
-                                    shinyContainer.appendChild(flashEl);
-                                    backTarget.appendChild(shinyContainer);
-
-                                    // Bullet hits the shield at 420ms
-                                    setTimeout(() => {
-                                        audioSynth.playGunshot();
-                                        targetContainer.classList.add('anim-shake');
-                                    }, 420);
-                                } else {
-                                    // Shield broke animation
-                                    backTarget.style.borderColor = 'var(--accent-crimson)';
-
-                                    const shatterContainer = document.createElement('div');
-                                    shatterContainer.className = 'shield-shatter-container';
-
-                                    const leftShield = document.createElement('div');
-                                    leftShield.className = 'shield-part shield-left';
-                                    leftShield.innerText = "🛡️";
-
-                                    const rightShield = document.createElement('div');
-                                    rightShield.className = 'shield-part shield-right';
-                                    rightShield.innerText = "🛡️";
-
-                                    shatterContainer.appendChild(leftShield);
-                                    shatterContainer.appendChild(rightShield);
-                                    backTarget.appendChild(shatterContainer);
-
-                                    // Shield breaks and collapses
-                                    setTimeout(() => {
-                                        audioSynth.playDeath();
-                                        targetContainer.classList.add('anim-shake');
-                                    }, 200);
-                                }
-                            }
-                        }, 400);
-
-                    } else if (parsed.actionType === 'block' || parsed.actionType === 'block_victim') {
-                        // Block effect
-                        const frontActor = actorContainer.querySelector('.recap-card-front');
-                        if (frontActor) frontActor.classList.add('recap-glow-block');
-                        audioSynth.playClick();
-
-                        setTimeout(() => {
-                            const backTarget = targetContainer.querySelector('.recap-card-back');
-                            if (backTarget) {
-                                backTarget.classList.add('recap-glow-block');
-                                const lockBadge = document.createElement('div');
-                                lockBadge.style.cssText = "position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(207,42,207,0.15); display:flex; justify-content:center; align-items:center; font-size:4.5rem; z-index:4; animation:selectableGlow 1s infinite alternate; text-shadow:0 0 15px rgba(207,42,207,0.8);";
-                                lockBadge.innerHTML = "🔒";
-                                backTarget.appendChild(lockBadge);
-                            }
-                        }, 400);
-
-                    } else if (parsed.actionType === 'spy' || parsed.actionType === 'track') {
-                        // Spy / Track scan effect
-                        const frontActor = actorContainer.querySelector('.recap-card-front');
-                        if (frontActor) frontActor.classList.add('recap-glow-spy');
-                        audioSynth.playScan();
-
-                        setTimeout(() => {
-                            const backTarget = targetContainer.querySelector('.recap-card-back');
-                            if (backTarget) {
-                                backTarget.classList.add('recap-glow-spy');
-                                const scanLine = document.createElement('div');
-                                scanLine.style.cssText = "position:absolute; width:100%; height:3px; background:var(--accent-blue); box-shadow:0 0 8px var(--accent-blue); left:0; z-index:4; animation:scanSweep 1.2s ease-in-out infinite;";
-                                backTarget.appendChild(scanLine);
-                            }
-                        }, 400);
-
-                    } else if (parsed.actionType === 'frame') {
-                        // Framer effect - target appears framed with a golden mask
-                        const frontActor = actorContainer.querySelector('.recap-card-front');
-                        if (frontActor) frontActor.classList.add('recap-glow-block');
-                        audioSynth.playScan();
-
-                        setTimeout(() => {
-                            const backTarget = targetContainer.querySelector('.recap-card-back');
-                            if (backTarget) {
-                                backTarget.style.background = 'rgba(207,138,42,0.15)';
-                                const maskBadge = document.createElement('div');
-                                maskBadge.style.cssText = "position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(207,138,42,0.2); display:flex; justify-content:center; align-items:center; font-size:4.5rem; z-index:4; text-shadow:0 0 15px rgba(207,138,42,0.8);";
-                                maskBadge.innerHTML = "🎭";
-                                backTarget.appendChild(maskBadge);
-                            }
-                        }, 400);
-                    }
-
-                    setTimeout(playNextRecap, 4600);
-                }, 300);
-
-            }, 200);
-        }
-
         function closeNightResultsOverlay() {
             nightRecapActive = false;
             document.getElementById('night-results-overlay').classList.add('hidden');
 
             document.getElementById('night-anim-actor-container').innerHTML = "";
             document.getElementById('night-anim-target-container').innerHTML = "";
+
+            const videoEl = document.getElementById('night-recap-video');
+            if (videoEl) {
+                videoEl.pause();
+                videoEl.currentTime = 0;
+                videoEl.src = "";
+            }
 
             if (nightResultsCallback) {
                 const cb = nightResultsCallback;
