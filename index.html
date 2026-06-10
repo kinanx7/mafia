@@ -35,33 +35,81 @@
         /* MOBILE BRIDGE: Only applies to small screens */
         @media (max-width: 600px) {
             :root {
-                --card-width: 90px;
-                --card-height: 160px;
+                --card-width: 70px;
+                --card-height: 120px;
             }
 
             body {
                 font-size: 14px;
+                overflow: hidden;
+                width: 100vw;
+                height: 100vh;
             }
 
             .glass-panel {
-                padding: 15px;
-                width: 98%;
+                padding: 10px;
+                width: 98vw;
+                max-height: 98vh;
+            }
+
+            .game-layout {
+                height: 98vh;
+                width: 98vw;
+                gap: 8px;
+            }
+
+            .game-top-bar {
+                padding: 5px 10px;
+                flex-wrap: wrap;
+            }
+
+            .phase-badge {
+                font-size: 1.1rem;
+            }
+
+            .timer-badge {
+                font-size: 1.1rem;
+                padding: 2px 8px;
             }
 
             .game-bottom-area {
-                height: 250px;
+                height: 200px;
+                gap: 8px;
+                max-height: 35vh;
             }
 
             .players-scroll-container {
                 padding: 5px;
             }
 
+            .player-card-name {
+                font-size: 0.65rem;
+            }
+
             .lobby-layout {
                 gap: 10px;
             }
 
+            .lobby-buttons-row {
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+
             .btn {
-                padding: 8px 12px;
+                padding: 8px 10px;
+                font-size: 0.85rem;
+            }
+
+            .card-vote-indicator {
+                width: 18px;
+                height: 18px;
+                font-size: 0.65rem;
+            }
+
+            .voice-status-badge {
+                width: 18px;
+                height: 18px;
+                font-size: 0.6rem;
             }
         }
 
