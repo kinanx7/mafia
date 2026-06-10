@@ -8062,6 +8062,7 @@
             nightResultsCallback = callback;
 
             let videoQueue = [];
+            let mafiaMadeKill = false;
 
             // Scan logs to queue up all relevant cutscenes
             for (const log of nightLogs) {
@@ -8071,10 +8072,16 @@
                 }
                 if (parsed.actor === 'mafia' && parsed.actionType === 'kill') {
                     videoQueue.push({ type: 'mafia_kill', name: parsed.targetPlayerName });
+                    mafiaMadeKill = true;
                 }
                 if (parsed.actor === 'vigilante' && parsed.actionType === 'shoot') {
                     videoQueue.push({ type: 'vig_kill', name: parsed.targetPlayerName });
                 }
+            }
+
+            // If mafia didn't kill anyone (e.g. skipped, roleblocked, or doctor saved the target)
+            if (!mafiaMadeKill) {
+                videoQueue.push({ type: 'mafia_no_kill', name: null });
             }
 
             const videoEl = document.getElementById('night-recap-video');
@@ -8102,30 +8109,35 @@
                     const scene = videoQueue.shift();
 
                     if (scene.type === 'save') {
-                        videoEl.src = "doctor_save.mp4";
+                        videoEl.src = "doctor_save.mp4"; 
                         videoEl.style.borderColor = "var(--accent-green)";
                         videoEl.style.boxShadow = "0 0 25px rgba(46, 207, 122, 0.6)";
                         descEl.innerText = `The Doctor successfully intervened and saved ${scene.name}!`;
                         audioSynth.playHeal();
                     } else if (scene.type === 'mafia_kill') {
-                        videoEl.src = "mafia_kill.mp4";
+                        videoEl.src = "mafia_kill.mp4"; 
                         videoEl.style.borderColor = "var(--accent-crimson)";
                         videoEl.style.boxShadow = "0 0 25px var(--accent-crimson-glow)";
                         descEl.innerText = `The Mafia assassinated ${scene.name}...`;
                         audioSynth.playGunshot();
                     } else if (scene.type === 'vig_kill') {
-                        videoEl.src = "vigilante_kill.mp4";
+                        videoEl.src = "vigilante_kill.mp4"; 
                         videoEl.style.borderColor = "var(--accent-gold)";
                         videoEl.style.boxShadow = "0 0 25px var(--accent-gold-glow)";
                         descEl.innerText = `The Vigilante shot ${scene.name}...`;
                         audioSynth.playGunshot();
+                    } else if (scene.type === 'mafia_no_kill') {
+                        videoEl.src = "mafia_no_kill.mp4"; 
+                        videoEl.style.borderColor = "var(--text-muted)";
+                        videoEl.style.boxShadow = "0 0 25px rgba(255, 255, 255, 0.2)";
+                        descEl.innerText = `The Mafia did not claim a victim tonight...`;
                     }
 
                     videoEl.onended = playNextCutscene;
 
                     videoEl.play().catch(e => {
                         console.warn("Video playback failed/missing, skipping to next.", e);
-                        if (videoQueue.length > 0) {
+                        if(videoQueue.length > 0) {
                             playNextCutscene();
                         } else {
                             videoEl.classList.add('hidden');
@@ -8136,7 +8148,7 @@
                 }
 
                 playNextCutscene();
-                return;
+                return; 
             }
 
             videoEl.classList.add('hidden');
