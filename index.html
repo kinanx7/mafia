@@ -691,9 +691,10 @@
         .deck-customizer {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            /* NEW: Limits the height and creates a scrollbar */
-            max-height: 280px;
+            gap: 8px;
+            /* Reduced gap to fit more roles */
+            max-height: 220px;
+            /* Reduced to fit screens without main scrollbar */
             overflow-y: auto;
             padding-right: 8px;
         }
@@ -856,7 +857,7 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            max-height: 280px;
+            max-height: 220px;
             /* Matched height with roles panel */
             overflow-y: auto;
             padding-right: 8px;
@@ -3157,58 +3158,50 @@
             <div class="lobby-section">
                 <div class="lobby-section-title" id="settings-lock-title">Room Settings</div>
 
-                <div class="deck-customizer" id="multi-settings-container">
-                    <!-- Discussion timer -->
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; margin-bottom: 8px;">
+                <!-- FIXED TIMERS SECTION: These stay visible at the top -->
+                <div id="multi-settings-timers"
+                    style="display: flex; flex-direction: column; gap: 6px; padding-right: 5px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
                         <span>Day Time (Discuss Time) Timer (sec)</span>
                         <div class="role-count-adjuster">
                             <button class="count-btn host-only-control"
                                 onclick="adjustMultiTimer('discuss', -5)">-</button>
-                            <span class="count-display" id="multi-timer-discuss-display" style="width: 35px;">45</span>
+                            <span class="count-display" id="multi-timer-discuss-display" style="width: 30px;">45</span>
                             <button class="count-btn host-only-control"
                                 onclick="adjustMultiTimer('discuss', 5)">+</button>
                         </div>
                     </div>
-                    <!-- Night Action timer -->
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; margin-bottom: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
                         <span>Night Time (Action Time) Timer (sec)</span>
                         <div class="role-count-adjuster">
                             <button class="count-btn host-only-control"
                                 onclick="adjustMultiTimer('night', -5)">-</button>
-                            <span class="count-display" id="multi-timer-night-display" style="width: 35px;">25</span>
+                            <span class="count-display" id="multi-timer-night-display" style="width: 30px;">25</span>
                             <button class="count-btn host-only-control"
                                 onclick="adjustMultiTimer('night', 5)">+</button>
                         </div>
                     </div>
-                    <!-- Voting timer -->
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
                         <span>Voting Timer (sec)</span>
                         <div class="role-count-adjuster">
                             <button class="count-btn host-only-control"
                                 onclick="adjustMultiTimer('vote', -5)">-</button>
-                            <span class="count-display" id="multi-timer-vote-display" style="width: 35px;">20</span>
+                            <span class="count-display" id="multi-timer-vote-display" style="width: 30px;">20</span>
                             <button class="count-btn host-only-control" onclick="adjustMultiTimer('vote', 5)">+</button>
                         </div>
                     </div>
-                    <!-- Defending timer -->
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
                         <span>Defending Timer (sec)</span>
                         <div class="role-count-adjuster">
                             <button class="count-btn host-only-control"
                                 onclick="adjustMultiTimer('defend', -5)">-</button>
-                            <span class="count-display" id="multi-timer-defend-display" style="width: 35px;">15</span>
+                            <span class="count-display" id="multi-timer-defend-display" style="width: 30px;">15</span>
                             <button class="count-btn host-only-control"
                                 onclick="adjustMultiTimer('defend', 5)">+</button>
                         </div>
                     </div>
 
-                    <!-- Reveal Roles toggle -->
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
                         <span>Reveal Roles on Death</span>
                         <div class="role-controls">
                             <label class="role-switch">
@@ -3218,8 +3211,16 @@
                             </label>
                         </div>
                     </div>
+                </div>
 
-                    <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;"></div>
+                <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px; margin-top: 8px;">
+                    <span
+                        style="color: var(--accent-gold); font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase;">Role
+                        Deck Configuration</span>
+                </div>
+
+                <!-- SCROLLABLE ROLES SECTION: Only the roles scroll now -->
+                <div class="deck-customizer" id="multi-settings-container">
 
                     <!-- Mafia count selector -->
                     <div class="deck-row">
@@ -3591,60 +3592,6 @@
                     style="width: 100%; background: rgba(0,0,0,0.4); color: #fff; font-size: 0.85rem; padding: 6px; border: 1px solid var(--glass-border); border-radius: 6px; cursor: pointer;">
                     <option value="">Default Microphone</option>
                 </select>
-            </div>
-
-            <!-- Multiplayer Connection Settings -->
-            <div id="multiplayer-connection-settings" class="hidden"
-                style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 15px; margin-top: 15px; margin-bottom: 15px;">
-                <h3 class="heading-serif"
-                    style="font-size: 1rem; color: var(--accent-gold); margin-bottom: 10px; text-align: left;">
-                    Signaling
-                    Broker Settings</h3>
-
-                <div class="setting-row"
-                    style="flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 12px;">
-                    <div style="display: flex; gap: 8px;">
-                        <div style="flex: 2; display: flex; flex-direction: column; gap: 4px;">
-                            <label style="font-size: 0.75rem; color: var(--text-muted); text-align: left;">Broker
-                                Host</label>
-                            <input type="text" id="peerjs-host" class="text-input" placeholder="0.peerjs.com"
-                                style="width: 100%; padding: 6px 10px; font-size: 0.85rem; height: auto;">
-                        </div>
-                        <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-                            <label style="font-size: 0.75rem; color: var(--text-muted); text-align: left;">Port</label>
-                            <input type="number" id="peerjs-port" class="text-input" placeholder="443"
-                                style="width: 100%; padding: 6px 10px; font-size: 0.85rem; height: auto;">
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 8px;">
-                        <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-                            <label style="font-size: 0.75rem; color: var(--text-muted); text-align: left;">Path</label>
-                            <input type="text" id="peerjs-path" class="text-input" placeholder="/"
-                                style="width: 100%; padding: 6px 10px; font-size: 0.85rem; height: auto;">
-                        </div>
-                        <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-                            <label style="font-size: 0.75rem; color: var(--text-muted); text-align: left;">Key</label>
-                            <input type="text" id="peerjs-key" class="text-input" placeholder="peerjs"
-                                style="width: 100%; padding: 6px 10px; font-size: 0.85rem; height: auto;">
-                        </div>
-                    </div>
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 0.85rem;">
-                        <span style="color: var(--text-main);">Secure Connection (SSL)</span>
-                        <label class="role-switch">
-                            <input type="checkbox" id="peerjs-secure" checked>
-                            <span class="switch-slider"></span>
-                        </label>
-                    </div>
-                    <div style="display: flex; gap: 8px; margin-top: 12px;">
-                        <button class="btn btn-gold" onclick="saveSignalingSettings()"
-                            style="flex: 1; font-size: 0.75rem; padding: 6px 12px; height: auto;">Save &
-                            Reconnect</button>
-                        <button class="btn" onclick="resetSignalingSettings()"
-                            style="flex: 1; font-size: 0.75rem; padding: 6px 12px; height: auto; background: rgba(255,255,255,0.05);">Reset
-                            Default</button>
-                    </div>
-                </div>
             </div>
 
             <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.4;">
