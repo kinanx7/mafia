@@ -3607,10 +3607,10 @@
             <div class="setting-row">
                 <label>Sound Effects</label>
                 <div class="slider-wrapper">
-                    <input type="range" class="vol-slider" id="sfx-slider" min="0" max="100" value="60"
+                    <input type="range" class="vol-slider" id="sfx-slider" min="0" max="100" value="30"
                         oninput="changeVolume('sfx', this.value)">
                     <span id="sfx-vol-display"
-                        style="font-family: monospace; width: 30px; text-align: right;">60%</span>
+                        style="font-family: monospace; width: 30px; text-align: right;">30%</span>
                 </div>
             </div>
 
@@ -3668,12 +3668,17 @@
                 style="color: var(--accent-gold); letter-spacing: 3px; font-size: 1.8rem; text-shadow: 0 0 10px var(--accent-gold-glow);">
                 NIGHT RECAP</h2>
 
-            <!-- NEW: Video Player for Cutscenes -->
             <video id="night-recap-video" class="hidden"
                 style="width: 100%; max-height: 350px; border-radius: 12px; object-fit: cover; border: 2px solid transparent; transition: border-color 0.3s, box-shadow 0.3s;"
                 playsinline></video>
 
-            <!-- Animation Stage (Fallback for non-video events) -->
+            <div style="display: none;">
+                <video src="doctor_save.mp4" preload="auto"></video>
+                <video src="mafia_kill.mp4" preload="auto"></video>
+                <video src="vigilante_kill.mp4" preload="auto"></video>
+                <video src="mafia_no_kill.mp4" preload="auto"></video>
+            </div>
+
             <div id="night-anim-stage"
                 style="display: flex; align-items: center; justify-content: center; gap: 35px; min-height: 280px; width: 100%; position: relative; margin: 20px 0;">
                 <div id="night-anim-actor-container" style="position: relative; transition: all 0.5s ease;"></div>
@@ -3689,12 +3694,10 @@
                 <div id="night-anim-target-container" style="position: relative; transition: all 0.5s ease;"></div>
             </div>
 
-            <!-- Description / Log Message -->
             <div id="night-anim-description"
                 style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 500; min-height: 50px; color: var(--text-main); margin-bottom: 10px; transition: opacity 0.3s ease; padding: 0 20px;">
             </div>
 
-            <!-- Action Buttons -->
             <div style="width: 100%; display: flex; justify-content: center;">
                 <button class="btn btn-gold hidden" id="btn-close-night-results" onclick="closeNightResultsOverlay()"
                     style="min-width: 180px; font-size: 1rem; padding: 12px 30px; box-shadow: 0 0 15px var(--accent-gold-glow);">Continue
@@ -3759,7 +3762,7 @@
                 this.bgmGain = null;
                 this.sfxGain = null;
                 this.musicVolume = 0.05; // Changed default from 0.3 (30%) to 0.05 (5%)
-                this.sfxVolume = 0.6;
+                this.sfxVolume = 0.3;
                 this.isBgmPlaying = false;
                 this.bgmType = null; // 'night' or 'day' or 'lobby' or 'mafia'
 
@@ -6040,9 +6043,9 @@
             tallyInProgress = false;
             document.body.className = "phase-night";
 
-            // Night lighting filter and background
+            // Night lighting filter and background updated for custom night.png visibility
             document.getElementById('bg-overlay').style.backgroundImage = "url('night.png')";
-            document.getElementById('bg-overlay').style.filter = "brightness(0.12) contrast(1.2) hue-rotate(50deg)";
+            document.getElementById('bg-overlay').style.filter = "brightness(0.8) contrast(1.1)";
 
             const isMafiaSide = myRole && ROLES_INFO[myRole] && ROLES_INFO[myRole].team === 'mafia';
             audioSynth.startNightMusic(isMafiaSide);
@@ -6899,7 +6902,7 @@
             switchGameTab('game', true);
             document.body.className = "phase-day";
             document.getElementById('bg-overlay').style.backgroundImage = "url('chating.png')";
-            document.getElementById('bg-overlay').style.filter = "brightness(0.25) contrast(1.1)";
+            document.getElementById('bg-overlay').style.filter = "brightness(0.9) contrast(1.1)";
 
             addNarrativeLog(`--- DAY TIME (DISCUSS TIME) ${roundsCount} ---`, 'system');
 
@@ -7073,7 +7076,7 @@
             clearBotVotingTimers();
 
             document.getElementById('bg-overlay').style.backgroundImage = "url('chating.png')";
-            document.getElementById('bg-overlay').style.filter = "brightness(0.25) contrast(1.1)";
+            document.getElementById('bg-overlay').style.filter = "brightness(0.9) contrast(1.1)";
 
             addNarrativeLog("Discussion concludes. The Town Council is called to order. Cast your vote!", 'system');
 
@@ -7151,7 +7154,7 @@
             tallyInProgress = false;
 
             document.getElementById('bg-overlay').style.backgroundImage = "url('chating.png')";
-            document.getElementById('bg-overlay').style.filter = "brightness(0.25) contrast(1.1)";
+            document.getElementById('bg-overlay').style.filter = "brightness(0.9) contrast(1.1)";
 
             const defendant = players.find(p => p.id === defendantId);
             const defendantName = defendant ? defendant.name : "A Suspect";
@@ -7241,7 +7244,7 @@
             currentTargetId = null;
 
             document.getElementById('bg-overlay').style.backgroundImage = "url('chating.png')";
-            document.getElementById('bg-overlay').style.filter = "brightness(0.25) contrast(1.1)";
+            document.getElementById('bg-overlay').style.filter = "brightness(0.9) contrast(1.1)";
 
             const defendant = players.find(p => p.id === defendantId);
             const defendantName = defendant ? defendant.name : "A Suspect";
