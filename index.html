@@ -1300,7 +1300,14 @@
             border: 1px solid rgba(255, 255, 255, 0.15);
             z-index: 4;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
+        }
+
+        .voice-status-badge.speaking {
+            background: rgba(42, 207, 122, 0.3);
+            border-color: var(--accent-green);
+            box-shadow: 0 0 12px var(--accent-green);
+            transform: scale(1.15);
         }
 
         .badge-mafia {
@@ -4729,6 +4736,7 @@
                 localAudioStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
                 console.log("Local microphone stream acquired.");
                 isMuted = false;
+                startSpeechMonitor(localAudioStream, myId, true);
             } catch (err) {
                 console.error("Microphone access denied or failed:", err);
             }
@@ -6497,12 +6505,12 @@
                 const blockedPlayer = players.find(p => p.id === blockedPlayerId);
                 if (blockedPlayer && blockedPlayer.alive) {
                     const blockedRole = blockedPlayer.role;
-                    if (blockedRole === 'mafia') nightActions.mafia = undefined;
-                    else if (blockedRole === 'doctor') nightActions.doctor = undefined;
-                    else if (blockedRole === 'detective') nightActions.detective = undefined;
-                    else if (blockedRole === 'framer') nightActions.framer = undefined;
-                    else if (blockedRole === 'vigilante') nightActions.vigilante = undefined;
-                    else if (blockedRole === 'scout') nightActions.scout = undefined;
+                    if (blockedRole === 'mafia') { nightActions.mafia = undefined; originalNightActions.mafia = undefined; }
+                    else if (blockedRole === 'doctor') { nightActions.doctor = undefined; originalNightActions.doctor = undefined; }
+                    else if (blockedRole === 'detective') { nightActions.detective = undefined; originalNightActions.detective = undefined; }
+                    else if (blockedRole === 'framer') { nightActions.framer = undefined; originalNightActions.framer = undefined; }
+                    else if (blockedRole === 'vigilante') { nightActions.vigilante = undefined; originalNightActions.vigilante = undefined; }
+                    else if (blockedRole === 'scout') { nightActions.scout = undefined; originalNightActions.scout = undefined; }
                 }
             }
 
@@ -7786,6 +7794,9 @@
         let gameOverWinnerTeam = 'town';
 
         function revealGameOver(winner, finalPlayersList) {
+            // STOP THE INFINITE LOOP: If the game is already over, ignore duplicate commands!
+            if (gameState === 'game_over') return;
+
             currentPhaseToken++;
             gameActive = false;
             gameState = 'game_over';
@@ -7828,9 +7839,9 @@
                 }
             });
 
-            // Sort lists by role to group them neatly
-            gameOverWinnersList.sort((a, b) => a.role.localeCompare(b.role));
-            gameOverLosersList.sort((a, b) => a.role.localeCompare(b.role));
+            // Sort lists by role to group them neatly (safely handling missing roles)
+            gameOverWinnersList.sort((a, b) => String(a.role || '').localeCompare(String(b.role || '')));
+            gameOverLosersList.sort((a, b) => String(a.role || '').localeCompare(String(b.role || '')));
 
             // Transition Screen
             document.getElementById('game-screen').classList.add('hidden');
@@ -7886,12 +7897,15 @@
                 badgeHTML = `<span class="card-status-badge" style="color:var(--accent-green);">ALIVE</span>`;
             }
 
+            // Pre-load the fallback SVG so it doesn't rely on being in the DOM yet
+            const fallbackSVG = ROLE_SVGS[p.role] || ROLE_SVGS.cardback;
+
             card.innerHTML = `
                 ${badgeHTML}
                 <span class="card-status-badge" style="top: 5px; right: 5px; left: auto; color:${roleBadgeColor}; font-weight:bold; font-size:0.6rem; z-index: 3;">${displayRoleName}</span>
                 <div class="card-art-container">
-                    <img src="${p.role || 'cardback'}.png" class="card-art-image" onerror="handleCardArtError(this, '${p.role || 'cardback'}', '${p.id}-go')">
-                    <div class="card-art-fallback hidden" id="fallback-svg-${p.id}-go"></div>
+                    <img src="${p.role || 'cardback'}.png" class="card-art-image" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+                    <div class="card-art-fallback hidden" style="width:100%; height:100%; display:flex; justify-content:center; align-items:center;">${fallbackSVG}</div>
                 </div>
                 <div class="player-card-name">${escapeHTML(p.name)} ${p.id === myId ? '(You)' : ''}</div>
             `;
@@ -8574,7 +8588,7 @@
             // Log on Host UI ONLY if the Host is supposed to see it
             const me = players.find(p => p.id === myId);
             let hostCanSee = false;
-            
+
             if (channel === 'all') {
                 hostCanSee = true;
             } else if (channel === 'mafia' && me && me.role === 'mafia') {
@@ -9052,6 +9066,7 @@
 
                 // Sync mute settings to the new track
                 updateVoiceStatus();
+                startSpeechMonitor(localAudioStream, myId, true);
             } catch (err) {
                 console.error("Failed to switch microphone device:", err);
                 alert("Could not switch to that microphone device. Please check system permissions.");
@@ -9170,6 +9185,7 @@
             });
             // Update muting based on state
             updateRemoteVoiceMuting();
+            startSpeechMonitor(stream, peerId, false);
         }
 
         function removeRemoteAudio(peerId) {
@@ -9177,6 +9193,86 @@
             if (audioEl) {
                 audioEl.srcObject = null;
                 audioEl.remove();
+            }
+            if (speechMonitors[peerId]) {
+                cancelAnimationFrame(speechMonitors[peerId].animFrame);
+                delete speechMonitors[peerId];
+            }
+        }
+
+        let audioContextForSpeech = null;
+        let speechMonitors = {};
+
+        function startSpeechMonitor(stream, peerId, isLocal) {
+            if (!stream || stream.getAudioTracks().length === 0) return;
+
+            // Resume/Create AudioContext on first use
+            if (!audioContextForSpeech) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) audioContextForSpeech = new AudioCtx();
+            }
+            if (!audioContextForSpeech) return;
+
+            // Only attach once per stream ID to avoid AudioContext resource leaks
+            if (speechMonitors[peerId] && speechMonitors[peerId].streamId === stream.id) {
+                return;
+            }
+
+            if (speechMonitors[peerId]) {
+                cancelAnimationFrame(speechMonitors[peerId].animFrame);
+            }
+
+            try {
+                const source = audioContextForSpeech.createMediaStreamSource(stream);
+                const analyser = audioContextForSpeech.createAnalyser();
+                analyser.fftSize = 256;
+                analyser.minDecibels = -70;
+                analyser.maxDecibels = -10;
+                source.connect(analyser);
+
+                const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+                const checkVolume = () => {
+                    analyser.getByteFrequencyData(dataArray);
+                    let sum = 0;
+                    for (let i = 0; i < dataArray.length; i++) {
+                        sum += dataArray[i];
+                    }
+                    const average = sum / dataArray.length;
+
+                    // Update UI if the card exists
+                    const card = document.getElementById(`card-${peerId}`);
+                    if (card) {
+                        const badge = card.querySelector('.voice-status-badge');
+                        if (badge) {
+                            let canHear = true;
+                            if (!isLocal) {
+                                const audioEl = document.getElementById(`audio-remote-${peerId}`);
+                                if (audioEl && audioEl.muted) canHear = false;
+                            } else {
+                                // For local player, check if their track is disabled
+                                if (stream.getAudioTracks()[0].enabled === false) canHear = false;
+                            }
+
+                            if (average > 15 && canHear) {
+                                badge.classList.add('speaking');
+                            } else {
+                                badge.classList.remove('speaking');
+                            }
+                        }
+                    }
+
+                    if (speechMonitors[peerId]) {
+                        speechMonitors[peerId].animFrame = requestAnimationFrame(checkVolume);
+                    }
+                };
+
+                speechMonitors[peerId] = {
+                    animFrame: requestAnimationFrame(checkVolume),
+                    streamId: stream.id
+                };
+            } catch (e) {
+                console.warn("Speech monitor could not be created for", peerId, e);
             }
         }
 
