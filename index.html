@@ -6460,26 +6460,21 @@
         function processNightCalculations() {
             if (!isHost) return;
 
-            // Trigger bot logic if Host
             if (isHost) {
                 simulateBotNightActions();
             }
 
-            // Build ordered night logs: kills always last for cinematic effect
             const nightLogsNonKill = [];
             const nightLogsKill = [];
             const originalNightActions = { ...nightActions };
 
-            // Check if standard Mafia is alive to determine hitman inheritance
             const aliveMafia = players.some(p => p.role === 'mafia' && p.alive);
 
-            // 1. Resolve Bard Roleblocks first & Factional Kill Conversion
             const bardPlayer = players.find(p => p.role === 'bard' && p.alive);
             let blockedPlayerId = null;
 
             if (bardPlayer && nightActions.bard) {
                 if (!aliveMafia) {
-                    // Mafia is dead. Bard inherits the kill instead of blocking!
                     nightActions.mafia = nightActions.bard;
                     originalNightActions.mafia = originalNightActions.bard;
 
@@ -6512,12 +6507,10 @@
                 }
             }
 
-            // 2. Framer action & Factional Kill Conversion
             const framerPlayer = players.find(p => p.role === 'framer' && p.alive);
 
             if (framerPlayer && nightActions.framer) {
                 if (!aliveMafia) {
-                    // Mafia is dead. Framer action converts into the Factional Kill!
                     nightActions.mafia = nightActions.framer;
                     originalNightActions.mafia = originalNightActions.framer;
 
@@ -6536,7 +6529,6 @@
                 }
             }
 
-            // 3. Scout tracking
             const scoutPlayer = players.find(p => p.role === 'scout' && p.alive);
             const scoutTargetId = nightActions.scout;
             let scoutTrackResult = null;
@@ -6569,7 +6561,6 @@
                 }
             }
 
-            // 4. Detective investigation
             const detectivePlayer = players.find(p => p.role === 'detective' && p.alive);
             if (detectivePlayer && nightActions.detective) {
                 const target = players.find(p => p.id === nightActions.detective);
@@ -6583,7 +6574,6 @@
                 }
             }
 
-            // 5. Doctor protection (non-kill context, added before kills)
             const targetKilled = nightActions.mafia;
             const targetHealed = nightActions.doctor;
             const targetShot = nightActions.vigilante;
@@ -6615,8 +6605,6 @@
                 }
             }
 
-            // 6. Kills — always last for dramatic effect
-            // Mafia Kill
             if (targetKilled) {
                 if (targetKilled !== targetHealed) {
                     const victim = players.find(p => p.id === targetKilled);
@@ -6635,7 +6623,6 @@
                 }
             }
 
-            // Vigilante Shoot
             const vigPlayer = players.find(p => p.role === 'vigilante' && p.alive);
             if (vigPlayer && targetShot) {
                 if (targetShot !== targetHealed) {
@@ -6666,14 +6653,9 @@
                 }
             }
 
-            // Check if game won
+            // Check if game won but do NOT exit early. Pass the win team down to the payload instead.
             const winTeam = checkGameWinConditions();
-            if (winTeam) {
-                revealGameOver(winTeam, players);
-                return;
-            }
 
-            // Merge logs: non-kills first, kills last
             const nightLogs = [...nightLogsNonKill, ...nightLogsKill];
 
             if (deaths.length === 0) {
@@ -6687,7 +6669,6 @@
 
             const savedPlayerId = (targetKilled && targetKilled === targetHealed) ? targetKilled : null;
 
-            // Prepare state payload for transition to Day
             const dayPayload = {
                 gameState: 'day_discuss',
                 players: players,
@@ -6704,16 +6685,15 @@
                 scoutTrackResult: scoutTrackResult,
                 deaths: deaths,
                 nightLogs: nightLogs,
-                blockedPlayerId: blockedPlayerId
+                blockedPlayerId: blockedPlayerId,
+                gameOverWinner: winTeam
             };
 
-            // Broadcast new state
             broadcastPacket({
                 type: 'GAME_STATE_UPDATE',
                 data: dayPayload
             });
 
-            // If Solo Mode, trigger state sync manually
             if (!isMultiplayer) {
                 const maskedPayload = JSON.parse(JSON.stringify(dayPayload));
                 maskedPayload.players = getMaskedPlayersForClient(myId);
@@ -6830,7 +6810,6 @@
             const previousState = gameState;
             gameState = data.gameState;
             if (isHost) {
-                // Merge player states from data to keep roles intact on host
                 data.players.forEach(src => {
                     const dest = players.find(p => p.id === src.id);
                     if (dest) {
@@ -6857,7 +6836,7 @@
 
             if (gameState === 'day_discuss') {
                 if (previousState !== 'day_discuss') {
-                    enterDayDiscussion(data.deathOccurred, data.victimName, data.savedPlayerId, data.detectiveScanResult, data.doctorTargetId, data.scoutTrackResult, data.deaths, data.nightLogs, data.blockedPlayerId);
+                    enterDayDiscussion(data.deathOccurred, data.victimName, data.savedPlayerId, data.detectiveScanResult, data.doctorTargetId, data.scoutTrackResult, data.deaths, data.nightLogs, data.blockedPlayerId, data.gameOverWinner);
                 }
             } else if (gameState === 'day_vote') {
                 if (previousState !== 'day_vote') {
@@ -6896,13 +6875,13 @@
             }
         }
 
-        function enterDayDiscussion(deathOccurred, victimName, savedPlayerId, detectiveScanResult, doctorTargetId, scoutTrackResult, deaths, nightLogs, blockedPlayerId) {
+        function enterDayDiscussion(deathOccurred, victimName, savedPlayerId, detectiveScanResult, doctorTargetId, scoutTrackResult, deaths, nightLogs, blockedPlayerId, gameOverWinner) {
             currentPhaseToken++;
             const expectedToken = currentPhaseToken;
             tallyInProgress = false;
             document.getElementById('game-feed-container').innerHTML = "";
             document.getElementById('game-chat-container').innerHTML = "";
-            switchGameTab('game', true); // Auto switch to Narrative Log tab silently at morning
+            switchGameTab('game', true);
             document.body.className = "phase-day";
             document.getElementById('bg-overlay').style.backgroundImage = "url('chating.png')";
             document.getElementById('bg-overlay').style.filter = "brightness(0.25) contrast(1.1)";
@@ -6911,7 +6890,7 @@
 
             if (nightLogs && nightLogs.length > 0) {
                 nightLogs.forEach(msg => {
-                    const displayStr = typeof msg === 'string' ? msg : msg.displayLog;
+                    const displayStr = typeof msg === 'object' ? msg.displayLog : msg;
                     let cls = 'narrative';
                     if (displayStr.includes('killed') || displayStr.includes('shot') || displayStr.includes('suicide') || displayStr.includes('died')) {
                         cls = 'death';
@@ -6925,7 +6904,6 @@
                     addNarrativeLog(displayStr, cls);
                 });
             } else {
-                // Fallback for empty logs
                 if (deaths && deaths.length > 0) {
                     deaths.forEach(d => {
                         const roleText = (deckConfig.revealRolesOnDeath && d.role) ? ` They were: ${d.role.toUpperCase()}.` : "";
@@ -6944,18 +6922,14 @@
                 }
             }
 
-            // Bard block private reveal
             if (blockedPlayerId && myId === blockedPlayerId) {
                 addNarrativeLog("You were blocked by the Bard tonight!", "system");
             }
 
-            // Toggles active chat panel inputs
             document.getElementById('game-chat-input-row').classList.remove('hidden');
 
-            // Build cards
             renderGamePlayerCards();
 
-            // Set instructions
             document.getElementById('game-phase-name').innerText = `Day Time (Discuss Time) ${roundsCount}`;
             document.getElementById('game-phase-instructions').innerText = "Day Time (Discuss Time): Review details, discuss suspects, and prepare to vote.";
 
@@ -6963,19 +6937,23 @@
             prompt.innerText = "TALK WITH THE TOWN. DISCUSS SUSPECTS.";
             prompt.classList.remove('hidden');
 
-            // Play the night recap animations screen overlay
             const logsToAnimate = (nightLogs && nightLogs.length > 0) ? nightLogs :
                 (deathOccurred ? [{ displayLog: `Mafia killed ${victimName}.`, actor: 'mafia', targetPlayerName: victimName, actionType: 'kill' }] : [{ displayLog: "Morning arrives. The streets are calm. No one died during the night.", actor: 'calm', targetPlayerName: null, actionType: 'calm' }]);
 
-            // Trigger visual blink FIRST
-            audioSynth.playRoosterCrow(); // Play rooster sound to welcome day
+            audioSynth.playRoosterCrow();
             triggerPhaseBlink("MORNING TRANSITION", "var(--accent-gold)", () => {
                 if (expectedToken !== currentPhaseToken) return;
                 playNightRecapAnimations(logsToAnimate, () => {
                     if (expectedToken !== currentPhaseToken) return;
+
+                    // Defer victory layout to trigger instantly here if game loop is complete
+                    if (gameOverWinner) {
+                        revealGameOver(gameOverWinner, players);
+                        return;
+                    }
+
                     audioSynth.startDayTick();
 
-                    // Trigger animations for night actions on the player card grid
                     if (deaths && deaths.length > 0) {
                         deaths.forEach(d => {
                             setTimeout(() => {
@@ -6993,7 +6971,6 @@
                         }
                     }
 
-                    // Detective scan reveal (only visible to Detective)
                     if (myRole === 'detective' && detectiveScanResult) {
                         const targetName = detectiveScanResult.targetName;
                         const roleName = detectiveScanResult.targetRole ? detectiveScanResult.targetRole.toUpperCase() : 'UNKNOWN';
@@ -7006,7 +6983,6 @@
                         }, 1000);
                     }
 
-                    // Scout track reveal (only visible to Scout)
                     if (myRole === 'scout' && scoutTrackResult) {
                         const targetName = scoutTrackResult.targetName;
                         const visitedName = scoutTrackResult.visitedName;
@@ -7024,7 +7000,6 @@
                         }, 1000);
                     }
 
-                    // Doctor target feedback (only visible to Doctor)
                     if (myRole === 'doctor' && doctorTargetId) {
                         audioSynth.playHeal();
                         setTimeout(() => {
@@ -7033,7 +7008,6 @@
                         }, 500);
                     }
 
-                    // Start countdown
                     startPhaseCountdown(timerConfig.discuss, () => {
                         if (expectedToken !== currentPhaseToken) return;
                         if (isHost) {
@@ -7041,12 +7015,10 @@
                         }
                     });
 
-                    // Start bot conversations
                     if (isHost) {
                         startBotChatTimer();
                     }
 
-                    // Automatically unmute for discussion
                     isMuted = false;
                     if (isMultiplayer) {
                         updateVoiceStatus();
