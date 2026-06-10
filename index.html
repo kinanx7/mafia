@@ -859,9 +859,24 @@
             flex-direction: column;
             gap: 8px;
             max-height: 150px;
-            /* Reduced to eliminate main page scrolling */
             overflow-y: auto;
             padding-right: 8px;
+        }
+
+        .mic-icon {
+            margin-left: 8px;
+            font-size: 0.9rem;
+            opacity: 0.3;
+            transition: all 0.15s ease;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .mic-icon.speaking {
+            opacity: 1;
+            color: var(--accent-green);
+            filter: drop-shadow(0 0 6px var(--accent-green));
+            transform: scale(1.2);
         }
 
         .lobby-player-row {
@@ -3743,7 +3758,7 @@
                 this.bgmSource = null;
                 this.bgmGain = null;
                 this.sfxGain = null;
-                this.musicVolume = 0.3;
+                this.musicVolume = 0.05; // Changed default from 0.3 (30%) to 0.05 (5%)
                 this.sfxVolume = 0.6;
                 this.isBgmPlaying = false;
                 this.bgmType = null; // 'night' or 'day' or 'lobby' or 'mafia'
@@ -4725,7 +4740,7 @@
                 localAudioStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
                 console.log("Local microphone stream acquired.");
                 isMuted = false;
-                startSpeechMonitor(localAudioStream, myId, true);
+                // Removed premature startSpeechMonitor call here so it waits for an ID
             } catch (err) {
                 console.error("Microphone access denied or failed:", err);
             }
@@ -4798,6 +4813,9 @@
                         if (lobbyMute) lobbyMute.classList.remove('hidden');
                         if (gameMute) gameMute.classList.remove('hidden');
                         updateVoiceStatus();
+
+                        // Start tracking local microphone activity ONLY AFTER we have our player ID
+                        startSpeechMonitor(localAudioStream, myId, true);
                     }
 
                     // Set up incoming call handler
@@ -5695,10 +5713,16 @@
                     kickBtnHTML = `<button class="btn btn-danger" onclick="kickPlayer('${p.id}')" style="padding: 4px 8px; font-size: 0.7rem; margin-left: 8px;">Kick</button>`;
                 }
 
+                let micHTML = "";
+                if (isMultiplayer && !p.isBot) {
+                    micHTML = `<span id="lobby-mic-${p.id}" class="mic-icon">🎤</span>`;
+                }
+
                 li.innerHTML = `
                     <div class="player-row-left">
                         <svg width="18" height="18" fill="var(--text-muted)" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.67-5.33-4-8-4z"/></svg>
                         <span>${escapeHTML(p.name)}</span>
+                        ${micHTML}
                     </div>
                     <div style="display: flex; align-items: center; gap: 8px;">
                         ${badge}
@@ -8109,25 +8133,25 @@
                     const scene = videoQueue.shift();
 
                     if (scene.type === 'save') {
-                        videoEl.src = "doctor_save.mp4"; 
+                        videoEl.src = "doctor_save.mp4";
                         videoEl.style.borderColor = "var(--accent-green)";
                         videoEl.style.boxShadow = "0 0 25px rgba(46, 207, 122, 0.6)";
                         descEl.innerText = `The Doctor successfully intervened and saved ${scene.name}!`;
                         audioSynth.playHeal();
                     } else if (scene.type === 'mafia_kill') {
-                        videoEl.src = "mafia_kill.mp4"; 
+                        videoEl.src = "mafia_kill.mp4";
                         videoEl.style.borderColor = "var(--accent-crimson)";
                         videoEl.style.boxShadow = "0 0 25px var(--accent-crimson-glow)";
                         descEl.innerText = `The Mafia assassinated ${scene.name}...`;
                         audioSynth.playGunshot();
                     } else if (scene.type === 'vig_kill') {
-                        videoEl.src = "vigilante_kill.mp4"; 
+                        videoEl.src = "vigilante_kill.mp4";
                         videoEl.style.borderColor = "var(--accent-gold)";
                         videoEl.style.boxShadow = "0 0 25px var(--accent-gold-glow)";
                         descEl.innerText = `The Vigilante shot ${scene.name}...`;
                         audioSynth.playGunshot();
                     } else if (scene.type === 'mafia_no_kill') {
-                        videoEl.src = "mafia_no_kill.mp4"; 
+                        videoEl.src = "mafia_no_kill.mp4";
                         videoEl.style.borderColor = "var(--text-muted)";
                         videoEl.style.boxShadow = "0 0 25px rgba(255, 255, 255, 0.2)";
                         descEl.innerText = `The Mafia did not claim a victim tonight...`;
@@ -8137,7 +8161,7 @@
 
                     videoEl.play().catch(e => {
                         console.warn("Video playback failed/missing, skipping to next.", e);
-                        if(videoQueue.length > 0) {
+                        if (videoQueue.length > 0) {
                             playNextCutscene();
                         } else {
                             videoEl.classList.add('hidden');
@@ -8148,7 +8172,7 @@
                 }
 
                 playNextCutscene();
-                return; 
+                return;
             }
 
             videoEl.classList.add('hidden');
@@ -8978,7 +9002,12 @@
             }
             if (!audioContextForSpeech) return;
 
-            // Only attach once per stream ID to avoid AudioContext resource leaks
+            // Ensure the audio context isn't sleeping
+            if (audioContextForSpeech.state === 'suspended') {
+                audioContextForSpeech.resume();
+            }
+
+            // Only attach once per stream ID
             if (speechMonitors[peerId] && speechMonitors[peerId].streamId === stream.id) {
                 return;
             }
@@ -8991,7 +9020,8 @@
                 const source = audioContextForSpeech.createMediaStreamSource(stream);
                 const analyser = audioContextForSpeech.createAnalyser();
                 analyser.fftSize = 256;
-                analyser.minDecibels = -70;
+                // INCREASED SENSITIVITY: -90 allows it to hear very quiet whispers
+                analyser.minDecibels = -90;
                 analyser.maxDecibels = -10;
                 source.connect(analyser);
 
@@ -9005,25 +9035,39 @@
                     }
                     const average = sum / dataArray.length;
 
-                    // Update UI if the card exists
+                    // Check if player is muted
+                    let canHear = true;
+                    if (!isLocal) {
+                        const audioEl = document.getElementById(`audio-remote-${peerId}`);
+                        if (audioEl && audioEl.muted) canHear = false;
+                    } else {
+                        // For local player, check if their track is disabled
+                        if (stream.getAudioTracks()[0].enabled === false) canHear = false;
+                    }
+
+                    // EXTREMELY LOW THRESHOLD: Triggers on almost any detected sound (average > 2)
+                    const isSpeaking = average > 2 && canHear;
+
+                    // 1. Update UI for the Game Player Cards (if visible)
                     const card = document.getElementById(`card-${peerId}`);
                     if (card) {
                         const badge = card.querySelector('.voice-status-badge');
                         if (badge) {
-                            let canHear = true;
-                            if (!isLocal) {
-                                const audioEl = document.getElementById(`audio-remote-${peerId}`);
-                                if (audioEl && audioEl.muted) canHear = false;
-                            } else {
-                                // For local player, check if their track is disabled
-                                if (stream.getAudioTracks()[0].enabled === false) canHear = false;
-                            }
-
-                            if (average > 15 && canHear) {
+                            if (isSpeaking) {
                                 badge.classList.add('speaking');
                             } else {
                                 badge.classList.remove('speaking');
                             }
+                        }
+                    }
+
+                    // 2. Update UI for the Multiplayer Lobby List (if visible)
+                    const lobbyMic = document.getElementById(`lobby-mic-${peerId}`);
+                    if (lobbyMic) {
+                        if (isSpeaking) {
+                            lobbyMic.classList.add('speaking');
+                        } else {
+                            lobbyMic.classList.remove('speaking');
                         }
                     }
 
