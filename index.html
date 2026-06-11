@@ -6395,7 +6395,7 @@
                     `;
                 } else {
                     artHTML = `
-                        <img src="cardback.png" class="card-art-image" onerror="handleCardArtError(this, 'cardback', '${p.id}')">
+                        <img src="secret.png" class="card-art-image" onerror="handleCardArtError(this, 'cardback', '${p.id}')">
                         <div class="card-art-fallback hidden" id="fallback-svg-${p.id}"></div>
                     `;
                 }
@@ -8741,7 +8741,7 @@
                 popupCard.innerHTML = `
                     ${statusBadgeHTML}
                     <div class="card-art-container">
-                        <img src="cardback.png" class="card-art-image" onerror="handlePopupCardArtError(this, 'cardback')">
+                        <img src="secret.png" class="card-art-image" onerror="handlePopupCardArtError(this, 'cardback')">
                         <div class="card-art-fallback hidden" id="popup-fallback-svg"></div>
                     </div>
                     <div class="player-card-name">${escapeHTML(p.name)}</div>
