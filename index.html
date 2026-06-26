@@ -3557,16 +3557,28 @@
 
     <!-- ------------------ 4. INTERACTIVE GAME BOARD ------------------ -->
     <div class="game-layout hidden" id="game-screen">
+
+        <!-- Small Roles HUD -->
+        <div id="in-game-roles-hud"
+            style="position: absolute; right: 2px; top: 100px; background: rgba(0,0,0,0.8); border: 1px solid var(--glass-border); border-radius: 8px; padding: 8px; z-index: 50; display: none; flex-direction: column; gap: 5px; font-size: 0.7rem; transform: scale(0.9); transform-origin: top right; pointer-events: none;">
+            <div
+                style="color: var(--accent-gold); font-weight: bold; margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 3px;">
+                Roles Active</div>
+            <div id="hud-roles-list"></div>
+        </div>
+
         <!-- Top Board Status Info -->
         <div class="game-top-bar">
             <div class="phase-indicator">
                 <div class="phase-badge" id="game-phase-name">Night 1</div>
                 <div class="timer-badge" id="game-phase-timer">30</div>
             </div>
-            <div class="phase-instructions" id="game-phase-instructions">Mafia: Click a player card to target
-                them for
+            <div class="phase-instructions" id="game-phase-instructions">Mafia: Click a player card to target them for
                 execution.</div>
             <div style="display: flex; gap: 8px;">
+                <button class="btn hidden" id="btn-host-skip" onclick="hostSkipTimer()"
+                    style="padding: 6px 12px; font-size: 0.8rem; background: linear-gradient(135deg, #a82020 0%, #cf2a2a 100%); border-color: #ff4d4d;">⏩
+                    Skip Timer</button>
                 <button class="btn btn-gold hidden" id="btn-game-mute-mic" onclick="toggleMuteMic()"
                     style="padding: 6px 12px; font-size: 0.8rem;">Mute Mic</button>
                 <button class="btn btn-danger" onclick="confirmLeaveGame()"
@@ -5064,10 +5076,20 @@
             connToHost.on('open', () => {
                 document.getElementById('lobby-chat-box').innerHTML += `<div style="color: var(--accent-blue);">Handshaking with host...</div>`;
 
-                // Send join registration packet
+                // Heartbeat to prevent random idle disconnects
+                const pinger = setInterval(() => {
+                    if (connToHost && connToHost.open) {
+                        connToHost.send({ type: 'PING' });
+                    } else {
+                        clearInterval(pinger);
+                    }
+                }, 5000);
+
+                // Send join registration packet (include old session for reconnects)
+                const oldSessionId = sessionStorage.getItem('mafia_session_id');
                 connToHost.send({
                     type: 'JOIN',
-                    data: { name: myName }
+                    data: { name: myName, oldId: oldSessionId }
                 });
             });
 
@@ -5076,8 +5098,17 @@
             });
 
             connToHost.on('close', () => {
-                alert("Host disconnected or lobby closed.");
-                leaveLobby();
+                if (gameActive) {
+                    addNarrativeLog("Connection to host lost! Reconnecting in 3 seconds...", "system");
+                    setTimeout(() => {
+                        if (gameActive && peer && !peer.destroyed) {
+                            connectToHostRoom(); // Attempt auto-reconnect
+                        }
+                    }, 3000);
+                } else {
+                    alert("Host disconnected or lobby closed.");
+                    leaveLobby();
+                }
             });
         }
 
@@ -5158,12 +5189,46 @@
 
         // HOST SIDE logic
         function handleHostPacket(conn, packet) {
-            console.log("Host received packet:", packet);
+            if (packet.type !== 'PING') console.log("Host received packet:", packet);
             const senderId = conn.peer;
 
             switch (packet.type) {
+                case 'PING':
+                    break; // Just keeping the connection alive
+
                 case 'JOIN':
-                    // Check if player name exists
+                    const oldId = packet.data.oldId;
+                    const returningPlayer = players.find(p => p.id === oldId && p.disconnected);
+
+                    // Reconnection Logic
+                    if (returningPlayer && gameActive) {
+                        clearTimeout(returningPlayer.dcTimer);
+                        returningPlayer.disconnected = false;
+                        returningPlayer.id = senderId; // Update to new PeerJS ID
+                        peerConns[senderId] = conn;
+
+                        conn.send({
+                            type: 'JOIN_ACCEPTED',
+                            data: { localId: senderId, name: returningPlayer.name }
+                        });
+
+                        // Resync game state for the reconnected player
+                        conn.send({
+                            type: 'GAME_STATE_UPDATE',
+                            data: {
+                                gameState: gameState,
+                                players: getMaskedPlayersForClient(senderId),
+                                roundsCount: roundsCount,
+                                votes: votes
+                            }
+                        });
+
+                        broadcastSystemChat(`${returningPlayer.name} has reconnected to the game!`);
+                        updateLobbyUI();
+                        return;
+                    }
+
+                    // Normal Join Logic
                     let pName = packet.data.name;
                     let suffix = 2;
                     while (players.some(p => p.name === pName)) {
@@ -5171,29 +5236,22 @@
                         suffix++;
                     }
 
-                    // Register client connection
                     peerConns[senderId] = conn;
-
-                    // Add player to room list
                     players.push({
                         id: senderId,
                         name: pName,
                         isBot: false,
                         isHost: false,
                         alive: true,
-                        role: null
+                        role: null,
+                        disconnected: false
                     });
 
-                    // Acknowledge connection accept
                     conn.send({
                         type: 'JOIN_ACCEPTED',
-                        data: {
-                            localId: senderId,
-                            name: pName
-                        }
+                        data: { localId: senderId, name: pName }
                     });
 
-                    // Broadcast updated player list and room settings to everyone
                     broadcastRoomState();
                     broadcastSystemChat(`${pName} has joined the room.`);
                     break;
@@ -5235,12 +5293,15 @@
 
         // CLIENT SIDE logic
         function handleClientPacket(packet) {
-            console.log("Client received packet:", packet);
+            if (packet.type !== 'PING') console.log("Client received packet:", packet);
             switch (packet.type) {
+                case 'PING':
+                    break; // Keep connection alive
                 case 'JOIN_ACCEPTED':
                     myId = packet.data.localId;
                     myName = packet.data.name;
-                    document.getElementById('player-name-input').value = myName; // Update with resolved suffix
+                    document.getElementById('player-name-input').value = myName;
+                    sessionStorage.setItem('mafia_session_id', myId); // Save for reconnects
                     break;
 
                 case 'KICK_PLAYER':
@@ -5679,13 +5740,22 @@
                 delete peerConns[peerId];
 
                 if (gameActive) {
-                    // Handle mid-game disconnection: mark dead or re-balance
-                    addNarrativeLog(`${pName} vanished mysteriously (Disconnected).`);
-                    players[playerIdx].alive = false;
-                    const winTeam = checkGameWinConditions();
-                    if (winTeam) {
-                        revealGameOver(winTeam, players);
-                    }
+                    // Give them 30 seconds to reconnect
+                    players[playerIdx].disconnected = true;
+                    broadcastSystemChat(`⚠️ ${pName} lost connection! They have 30 seconds to rejoin.`);
+
+                    players[playerIdx].dcTimer = setTimeout(() => {
+                        if (players[playerIdx] && players[playerIdx].disconnected) {
+                            addNarrativeLog(`${pName} vanished permanently (Failed to reconnect).`);
+                            players[playerIdx].alive = false;
+                            const winTeam = checkGameWinConditions();
+                            if (winTeam) {
+                                revealGameOver(winTeam, players);
+                            } else {
+                                renderGamePlayerCards();
+                            }
+                        }
+                    }, 30000); // 30 seconds
                 } else {
                     players.splice(playerIdx, 1);
                     broadcastRoomState();
@@ -6101,6 +6171,10 @@
         }
 
         function initializeGamePlay() {
+            // FORCE HIDE ALL OVERLAYS ON START
+            document.getElementById('role-popup-overlay').classList.add('hidden');
+            document.getElementById('night-results-overlay').classList.add('hidden');
+
             gameActive = true;
             roundsCount = 1;
             gameState = 'night';
@@ -6109,6 +6183,34 @@
             clearBotDefendTimers();
             jesterWinIds = [];
             tallyInProgress = false;
+
+            // Update Roles HUD
+            const hud = document.getElementById('in-game-roles-hud');
+            const hudList = document.getElementById('hud-roles-list');
+            if (hud && hudList) {
+                hud.style.display = 'flex';
+                // Count roles
+                const roleCounts = {};
+                players.forEach(p => {
+                    roleCounts[p.role] = (roleCounts[p.role] || 0) + 1;
+                });
+                hudList.innerHTML = Object.keys(roleCounts).map(role => {
+                    const info = ROLES_INFO[role];
+                    const color = info ? (info.team === 'mafia' ? 'var(--accent-crimson)' : 'var(--accent-blue)') : '#fff';
+                    const name = info ? info.name : role;
+                    return `<div style="color: ${color};"><span style="color:#fff;">${roleCounts[role]}x</span> ${name}</div>`;
+                }).join('');
+            }
+
+            // Show Skip Timer button for Host
+            const skipBtn = document.getElementById('btn-host-skip');
+            if (skipBtn) {
+                if (isHost) {
+                    skipBtn.classList.remove('hidden');
+                } else {
+                    skipBtn.classList.add('hidden');
+                }
+            }
 
             // Reset doctor self protect rounds
             players.forEach(p => {
@@ -8534,30 +8636,56 @@
 
         /* ------------------ GENERAL STATE TIMERS ------------------ */
 
+        let currentTimerCallback = null;
+
         function startPhaseCountdown(seconds, callback) {
             if (gameTimer) clearInterval(gameTimer);
             gameSecondsLeft = seconds;
+            currentTimerCallback = callback;
 
             const timerEl = document.getElementById('game-phase-timer');
-            timerEl.innerText = gameSecondsLeft;
-            timerEl.classList.remove('timer-warning');
+            if (timerEl) {
+                timerEl.innerText = gameSecondsLeft;
+                timerEl.classList.remove('timer-warning');
+            }
 
             const countdown = () => {
                 gameSecondsLeft--;
-                timerEl.innerText = gameSecondsLeft;
+                if (timerEl) timerEl.innerText = gameSecondsLeft;
 
-                if (gameSecondsLeft <= 5) {
+                if (gameSecondsLeft <= 5 && timerEl) {
                     timerEl.classList.add('timer-warning');
                     audioSynth.playClick(); // countdown clicks
                 }
 
                 if (gameSecondsLeft <= 0) {
                     clearInterval(gameTimer);
-                    callback();
+                    if (currentTimerCallback) {
+                        let cb = currentTimerCallback;
+                        currentTimerCallback = null;
+                        cb();
+                    }
                 }
             };
 
             gameTimer = setInterval(countdown, 1000);
+        }
+
+        function hostSkipTimer() {
+            if (!isHost) return;
+            audioSynth.playClick();
+            if (gameTimer) {
+                clearInterval(gameTimer);
+                gameSecondsLeft = 0;
+                const timerEl = document.getElementById('game-phase-timer');
+                if (timerEl) timerEl.innerText = "0";
+
+                if (currentTimerCallback) {
+                    let cb = currentTimerCallback;
+                    currentTimerCallback = null;
+                    cb();
+                }
+            }
         }
 
         /* ------------------ SHUFFLE & HELPER UTILITIES ------------------ */
