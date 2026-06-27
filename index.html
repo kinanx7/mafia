@@ -3560,7 +3560,7 @@
 
         <!-- Small Roles HUD -->
         <div id="in-game-roles-hud"
-            style="position: absolute; right: 2px; top: 100px; background: rgba(0,0,0,0.8); border: 1px solid var(--glass-border); border-radius: 8px; padding: 8px; z-index: 50; display: none; flex-direction: column; gap: 5px; font-size: 0.7rem; transform: scale(0.9); transform-origin: top right; pointer-events: none;">
+            style="position: absolute; right: 0px; top: 80px; background: rgba(0,0,0,0.85); border: 1px solid var(--glass-border); border-radius: 8px 0 0 8px; padding: 12px; z-index: 50; display: none; flex-direction: column; gap: 6px; font-size: 0.85rem; pointer-events: none; box-shadow: -5px 5px 15px rgba(0,0,0,0.5);">
             <div
                 style="color: var(--accent-gold); font-weight: bold; margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 3px;">
                 Roles Active</div>
@@ -3575,10 +3575,13 @@
             </div>
             <div class="phase-instructions" id="game-phase-instructions">Mafia: Click a player card to target them for
                 execution.</div>
-            <div style="display: flex; gap: 8px;">
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                 <button class="btn hidden" id="btn-host-skip" onclick="hostSkipTimer()"
                     style="padding: 6px 12px; font-size: 0.8rem; background: linear-gradient(135deg, #a82020 0%, #cf2a2a 100%); border-color: #ff4d4d;">⏩
-                    Skip Timer</button>
+                    Skip</button>
+                <button class="btn" onclick="toggleRolesActiveHud()"
+                    style="padding: 6px 12px; font-size: 0.8rem; border-color: var(--accent-blue);">📋 Active
+                    Roles</button>
                 <button class="btn btn-gold hidden" id="btn-game-mute-mic" onclick="toggleMuteMic()"
                     style="padding: 6px 12px; font-size: 0.8rem;">Mute Mic</button>
                 <button class="btn btn-danger" onclick="confirmLeaveGame()"
@@ -3588,7 +3591,6 @@
             </div>
         </div>
 
-        <!-- Middle Player Cards Grid -->
         <div class="game-middle-area">
             <div class="players-scroll-container" id="game-players-scroll-container">
                 <div class="player-cards-grid" id="game-player-cards-container">
@@ -4283,6 +4285,18 @@
             }
         }
 
+        function toggleRolesActiveHud() {
+            audioSynth.playClick();
+            const hud = document.getElementById('in-game-roles-hud');
+            if (hud) {
+                if (hud.style.display === 'none' || hud.style.display === '') {
+                    hud.style.display = 'flex';
+                } else {
+                    hud.style.display = 'none';
+                }
+            }
+        }
+
         function toggleSettingsModal(show) {
             audioSynth.playClick();
             const modal = document.getElementById('settings-modal');
@@ -4933,6 +4947,12 @@
                 console.log('PeerJS connection opened with ID:', id);
                 peerRetryCount = 0; // Reset retry count
 
+                // Render.com Free Tier Keep-Alive Ping
+                // Sends an HTTP request every 4 minutes so Render doesn't put the server to sleep!
+                setInterval(() => {
+                    fetch('https://' + peer_options.host).catch(() => { });
+                }, 240000);
+
                 // Hide network error banner on successful connection
                 const errBanner = document.getElementById('lobby-network-error-banner');
                 if (errBanner) errBanner.classList.add('hidden');
@@ -5086,7 +5106,7 @@
                 }, 5000);
 
                 // Send join registration packet (include old session for reconnects)
-                const oldSessionId = sessionStorage.getItem('mafia_session_id');
+                const oldSessionId = localStorage.getItem('mafia_session_id');
                 connToHost.send({
                     type: 'JOIN',
                     data: { name: myName, oldId: oldSessionId }
@@ -5198,12 +5218,24 @@
 
                 case 'JOIN':
                     const oldId = packet.data.oldId;
-                    const returningPlayer = players.find(p => p.id === oldId && p.disconnected);
 
-                    // Reconnection Logic
-                    if (returningPlayer && gameActive) {
-                        clearTimeout(returningPlayer.dcTimer);
+                    // Look for returning player by old session ID, or by exact name matching
+                    let returningPlayer = oldId ? players.find(p => p.id === oldId) : null;
+                    if (!returningPlayer) {
+                        returningPlayer = players.find(p => p.name.toLowerCase() === packet.data.name.toLowerCase());
+                    }
+
+                    // Reconnection Logic (Lobby or Game)
+                    if (returningPlayer) {
+                        if (returningPlayer.dcTimer) clearTimeout(returningPlayer.dcTimer);
                         returningPlayer.disconnected = false;
+
+                        // Cleanup old connection object if it is lingering
+                        if (peerConns[returningPlayer.id] && returningPlayer.id !== senderId) {
+                            try { peerConns[returningPlayer.id].close(); } catch (e) { }
+                            delete peerConns[returningPlayer.id];
+                        }
+
                         returningPlayer.id = senderId; // Update to new PeerJS ID
                         peerConns[senderId] = conn;
 
@@ -5212,19 +5244,35 @@
                             data: { localId: senderId, name: returningPlayer.name }
                         });
 
-                        // Resync game state for the reconnected player
-                        conn.send({
-                            type: 'GAME_STATE_UPDATE',
-                            data: {
-                                gameState: gameState,
-                                players: getMaskedPlayersForClient(senderId),
-                                roundsCount: roundsCount,
-                                votes: votes
-                            }
-                        });
+                        if (gameActive) {
+                            // Send config so they can rebuild their HUD
+                            conn.send({
+                                type: 'ROOM_STATE',
+                                data: {
+                                    players: getMaskedPlayersForClient(senderId),
+                                    deckConfig: deckConfig,
+                                    timerConfig: timerConfig
+                                }
+                            });
 
-                        broadcastSystemChat(`${returningPlayer.name} has reconnected to the game!`);
-                        updateLobbyUI();
+                            // Resync game state for the reconnected player
+                            conn.send({
+                                type: 'GAME_STATE_UPDATE',
+                                data: {
+                                    gameState: gameState,
+                                    players: getMaskedPlayersForClient(senderId),
+                                    roundsCount: roundsCount,
+                                    votes: votes,
+                                    defendingPlayerId: defendingPlayerId,
+                                    defendVotes: defendVotes
+                                }
+                            });
+                            broadcastSystemChat(`${returningPlayer.name} has reconnected to the game!`);
+                            updateLobbyUI();
+                        } else {
+                            broadcastSystemChat(`${returningPlayer.name} has reconnected to the lobby!`);
+                            broadcastRoomState();
+                        }
                         return;
                     }
 
@@ -5301,7 +5349,7 @@
                     myId = packet.data.localId;
                     myName = packet.data.name;
                     document.getElementById('player-name-input').value = myName;
-                    sessionStorage.setItem('mafia_session_id', myId); // Save for reconnects
+                    localStorage.setItem('mafia_session_id', myId); // Save for reconnects even if tab is closed
                     break;
 
                 case 'KICK_PLAYER':
@@ -5368,6 +5416,49 @@
                     break;
 
                 case 'GAME_STATE_UPDATE':
+                    // If reconnecting mid-game, boot up the UI
+                    if (!gameActive && packet.data.gameState && packet.data.gameState !== 'game_over') {
+                        gameActive = true;
+
+                        // Hide menus, show game board
+                        document.getElementById('menu-screen').classList.add('hidden');
+                        document.getElementById('multiplayer-mode-screen').classList.add('hidden');
+                        document.getElementById('multiplayer-lobby-screen').classList.add('hidden');
+                        document.getElementById('game-screen').classList.remove('hidden');
+
+                        players = packet.data.players;
+                        const me = players.find(p => p.id === myId);
+                        if (me) myRole = me.role;
+                        roundsCount = packet.data.roundsCount || 1;
+
+                        // Setup local visuals
+                        setupMyRoleCardFront();
+
+                        // Rebuild active roles HUD
+                        const hudList = document.getElementById('hud-roles-list');
+                        if (hudList && window.deckConfig) {
+                            let specialCount = deckConfig.mafia;
+                            let html = `<div style="color: var(--accent-crimson);"><span style="color:#fff; font-weight:bold;">${deckConfig.mafia}x</span> Mafia</div>`;
+                            const townRoles = ['doctor', 'detective', 'vigilante', 'scout', 'medium'];
+                            const neutralRoles = ['jester'];
+                            const mafiaRoles = ['framer', 'bard'];
+
+                            const addRoleToHud = (key, color) => {
+                                if (deckConfig[key]) {
+                                    specialCount++;
+                                    html += `<div style="color: ${color};"><span style="color:#fff; font-weight:bold;">1x</span> ${ROLES_INFO[key].name}</div>`;
+                                }
+                            };
+                            townRoles.forEach(r => addRoleToHud(r, 'var(--accent-blue)'));
+                            neutralRoles.forEach(r => addRoleToHud(r, '#cf2acf'));
+                            mafiaRoles.forEach(r => addRoleToHud(r, 'var(--accent-crimson)'));
+
+                            const villagerCount = Math.max(0, players.length - specialCount);
+                            if (villagerCount > 0) html += `<div style="color: var(--accent-blue);"><span style="color:#fff; font-weight:bold;">${villagerCount}x</span> Villager</div>`;
+                            hudList.innerHTML = html;
+                        }
+                    }
+
                     // Sync active game loop state
                     syncGameState(packet.data);
                     break;
@@ -5740,22 +5831,10 @@
                 delete peerConns[peerId];
 
                 if (gameActive) {
-                    // Give them 30 seconds to reconnect
+                    // Mark as disconnected but DO NOT KILL THEM
                     players[playerIdx].disconnected = true;
-                    broadcastSystemChat(`⚠️ ${pName} lost connection! They have 30 seconds to rejoin.`);
-
-                    players[playerIdx].dcTimer = setTimeout(() => {
-                        if (players[playerIdx] && players[playerIdx].disconnected) {
-                            addNarrativeLog(`${pName} vanished permanently (Failed to reconnect).`);
-                            players[playerIdx].alive = false;
-                            const winTeam = checkGameWinConditions();
-                            if (winTeam) {
-                                revealGameOver(winTeam, players);
-                            } else {
-                                renderGamePlayerCards();
-                            }
-                        }
-                    }, 30000); // 30 seconds
+                    broadcastSystemChat(`⚠️ ${pName} lost connection! They can rejoin at any time.`);
+                    addNarrativeLog(`${pName} lost connection, but their character remains alive in the game.`);
                 } else {
                     players.splice(playerIdx, 1);
                     broadcastRoomState();
@@ -6184,32 +6263,45 @@
             jesterWinIds = [];
             tallyInProgress = false;
 
-            // Update Roles HUD
+            // Update Roles HUD (Read from deckConfig so clients don't see "null")
             const hud = document.getElementById('in-game-roles-hud');
             const hudList = document.getElementById('hud-roles-list');
             if (hud && hudList) {
-                hud.style.display = 'flex';
-                // Count roles
-                const roleCounts = {};
-                players.forEach(p => {
-                    roleCounts[p.role] = (roleCounts[p.role] || 0) + 1;
-                });
-                hudList.innerHTML = Object.keys(roleCounts).map(role => {
-                    const info = ROLES_INFO[role];
-                    const color = info ? (info.team === 'mafia' ? 'var(--accent-crimson)' : 'var(--accent-blue)') : '#fff';
-                    const name = info ? info.name : role;
-                    return `<div style="color: ${color};"><span style="color:#fff;">${roleCounts[role]}x</span> ${name}</div>`;
-                }).join('');
+                // Ensure it stays hidden until the user clicks the button
+                hud.style.display = 'none';
+
+                let specialCount = deckConfig.mafia;
+                let html = `<div style="color: var(--accent-crimson);"><span style="color:#fff; font-weight:bold;">${deckConfig.mafia}x</span> Mafia</div>`;
+
+                const townRoles = ['doctor', 'detective', 'vigilante', 'scout', 'medium'];
+                const neutralRoles = ['jester'];
+                const mafiaRoles = ['framer', 'bard'];
+
+                const addRoleToHud = (key, color) => {
+                    if (deckConfig[key]) {
+                        specialCount++;
+                        const name = ROLES_INFO[key].name;
+                        html += `<div style="color: ${color};"><span style="color:#fff; font-weight:bold;">1x</span> ${name}</div>`;
+                    }
+                };
+
+                townRoles.forEach(r => addRoleToHud(r, 'var(--accent-blue)'));
+                neutralRoles.forEach(r => addRoleToHud(r, '#cf2acf'));
+                mafiaRoles.forEach(r => addRoleToHud(r, 'var(--accent-crimson)'));
+
+                const villagerCount = Math.max(0, players.length - specialCount);
+                if (villagerCount > 0) {
+                    html += `<div style="color: var(--accent-blue);"><span style="color:#fff; font-weight:bold;">${villagerCount}x</span> Villager</div>`;
+                }
+
+                hudList.innerHTML = html;
             }
 
             // Show Skip Timer button for Host
             const skipBtn = document.getElementById('btn-host-skip');
             if (skipBtn) {
-                if (isHost) {
-                    skipBtn.classList.remove('hidden');
-                } else {
-                    skipBtn.classList.add('hidden');
-                }
+                if (isHost) skipBtn.classList.remove('hidden');
+                else skipBtn.classList.add('hidden');
             }
 
             // Reset doctor self protect rounds
@@ -6408,7 +6500,7 @@
                 `;
             } else {
                 artHTML = `
-                    <img src="cardback.png" class="card-art-image" onerror="handleCardArtError(this, 'cardback', 'spotlight-${p.id}')">
+                    <img src="secret.png" class="card-art-image" onerror="handleCardArtError(this, 'cardback', 'spotlight-${p.id}')">
                     <div class="card-art-fallback hidden" id="fallback-svg-spotlight-${p.id}"></div>
                 `;
             }
@@ -6492,13 +6584,13 @@
                 let artHTML = "";
                 if (displayRole) {
                     artHTML = `
-                        <img src="${displayRole}.png" class="card-art-image" onerror="handleCardArtError(this, '${displayRole}', '${p.id}')">
-                        <div class="card-art-fallback hidden" id="fallback-svg-${p.id}"></div>
+                        <img src="${displayRole}.png" class="card-art-image" onerror="handleCardArtError(this, '${displayRole}', 'spotlight-${p.id}')">
+                        <div class="card-art-fallback hidden" id="fallback-svg-spotlight-${p.id}"></div>
                     `;
                 } else {
                     artHTML = `
-                        <img src="secret.png" class="card-art-image" onerror="handleCardArtError(this, 'cardback', '${p.id}')">
-                        <div class="card-art-fallback hidden" id="fallback-svg-${p.id}"></div>
+                        <img src="secret.png" class="card-art-image" onerror="handleCardArtError(this, 'cardback', 'spotlight-${p.id}')">
+                        <div class="card-art-fallback hidden" id="fallback-svg-spotlight-${p.id}"></div>
                     `;
                 }
 
@@ -8003,8 +8095,16 @@
         let gameOverWinnerTeam = 'town';
 
         function revealGameOver(winner, finalPlayersList) {
-            // STOP THE INFINITE LOOP: If the game is already over, ignore duplicate commands!
-            if (gameState === 'game_over') return;
+            // Update local players list to show actual roles immediately!
+            if (finalPlayersList) {
+                players = finalPlayersList;
+            }
+
+            // STOP THE INFINITE LOOP: If game is over, re-render the unmasked cards and exit!
+            if (gameState === 'game_over') {
+                renderGameOverPage();
+                return;
+            }
 
             currentPhaseToken++;
             gameActive = false;
@@ -8018,11 +8118,6 @@
             audioSynth.stopBgm();
 
             gameOverWinnerTeam = winner;
-
-            // Update local players list to show actual roles!
-            if (finalPlayersList) {
-                players = finalPlayersList;
-            }
 
             // Determine Winners and Losers
             gameOverWinnersList = [];
@@ -8113,7 +8208,7 @@
                 ${badgeHTML}
                 <span class="card-status-badge" style="top: 5px; right: 5px; left: auto; color:${roleBadgeColor}; font-weight:bold; font-size:0.6rem; z-index: 3;">${displayRoleName}</span>
                 <div class="card-art-container">
-                    <img src="${p.role || 'cardback'}.png" class="card-art-image" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+                    <img src="${p.role || 'secret'}.png" class="card-art-image" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
                     <div class="card-art-fallback hidden" style="width:100%; height:100%; display:flex; justify-content:center; align-items:center;">${fallbackSVG}</div>
                 </div>
                 <div class="player-card-name">${escapeHTML(p.name)} ${p.id === myId ? '(You)' : ''}</div>
